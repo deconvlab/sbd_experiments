@@ -28,7 +28,8 @@ function o = reset(o, y, ainit)
 end
 
 function o = step(o)
-    [o.xsolver, o.cost] = evaluate(o.xsolver, o.y, o.a, o.params.weights);
+    o.xsolver.x = o.x;
+    [o.xsolver, o.cost] = evaluate(o.xsolver, o.y, o.a, o.params.lambda);
     o.x = o.xsolver.x;
     xhat = fft(o.x);
     

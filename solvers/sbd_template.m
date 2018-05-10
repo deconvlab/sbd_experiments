@@ -1,7 +1,7 @@
 classdef sbd_template < matlab.mixin.SetGet
 properties
     y;  a;  x;
-    params = struct('weights', 0.1, 'alph', 0.9);
+    params = struct('lambda', 0.1, 'alph', 0.9);
 
     cost;
     it;
@@ -56,7 +56,7 @@ function [o, stats] = iterate(o, ilim, tol)
     
     repeat = true;
     it = 0;
-    costs = [Inf; NaN(ilim(2),1)];
+    costs = [Inf NaN(1, ilim(2))];
     while repeat
         o = step(o);
         it = it + 1;
@@ -69,5 +69,35 @@ function [o, stats] = iterate(o, ilim, tol)
     stats.eps = eps;
     stats.costs = costs(2:it+1);
 end
+
+function o = center(o)
+    p = numel(o.a);
+    wsz = ceil((2+p)/3);
+    
+    [~, tau] = max(abs(xcorr(o.a, ones(wsz,1))));
+    tau = tau - p - floor((p-wsz)/2);
+    tmp = circshift([o.a; zeros(p,1)], -tau);
+    o.a = tmp(1:p);
+    o.x = circshift(o.x, tau);
+end
+
+function [o, stats] = solve(o, ilim, tol, lambdas)
+    o_lam = o.params.lambda;
+    if nargin < 2 || isempty(ilim);     ilim = [];  end
+    if nargin < 3 || isempty(tol);      tol = [];   end
+    if nargin < 4 || isempty(lambdas)
+        lambdas = o_lam;
+    end
+    
+    stats = cell(1,numel(lambdas));
+    for i = 1:numel(lambdas)
+        o = center(o);
+        o.params.lambda = lambdas(i);
+        [o, stats{i}] = iterate(o, ilim, tol);
+    end
+    o.params.lambda = o_lam;
+    stats = cell2mat(stats);
+end
+
 end
 end

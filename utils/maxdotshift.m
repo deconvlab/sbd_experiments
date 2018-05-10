@@ -13,7 +13,7 @@ tmp(1:p) = aref;
 aref = tmp;
 
 % Test truncations by default
-if (nargin < 3) || isempty(test_truncations) || ~test_truncations
+if (nargin < 3) || isempty(test_truncations) || test_truncations
     STs = -ceil(p/2):ceil(p/2);
 else
     STs = 0;
