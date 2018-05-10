@@ -8,28 +8,40 @@ properties
     eps;
 end
 
+properties (Access = protected)
+    y;  yhat;
+end
+
 methods
 function o = lasso_fista(params)
     o = set_params(o, params);
 end
+
 function o = reset(o)
     o.x = [];
     o.costs = [];
     o.it = [];
     o.eps = [];
 end
+
+function o = set_y(o, y)
+    o.y = y;
+    o.yhat = fft(y);
+end
+
 function o = set_params(o, params)
     tmp = intersect(fieldnames(o.params), fieldnames(params));
     for i = 1:numel(tmp)
         o.params.(tmp{i}) = params.(tmp{i});
     end
 end
-function [o, cost] = evaluate(o, y, a, weights)
-    m = numel(y);  y = y(:);  a = a(:);
+
+function [o, cost] = evaluate(o, a, weights)
+    m = numel(o.y);  a = a(:);
     
     ahat = fft(a,m);
     a2hat = abs(ahat).^2;
-    ayhat = conj(ahat).*fft(y);
+    ayhat = conj(ahat).*o.yhat;
     s = 0.99/max(a2hat);
     
     if isempty(o.x)
@@ -48,7 +60,7 @@ function [o, cost] = evaluate(o, y, a, weights)
         t = t_;  xhat_ = xhat;
         o.it = o.it + 1;
         
-        o.costs(o.it) = norm(real(ifft(ahat.*xhat))-y)^2/2 ...
+        o.costs(o.it) = norm(real(ifft(ahat.*xhat))-o.y)^2/2 ...
             + norm(weights .* o.x(:),1);
         
         o.eps = abs(cost - o.costs(o.it));

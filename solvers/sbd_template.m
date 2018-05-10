@@ -1,38 +1,42 @@
 classdef sbd_template < matlab.mixin.SetGet
 properties
-    y;  a;  x;
+    a;  x;
     params = struct('lambda', 0.1, 'alph', 0.9);
 
     cost;
     it;
 end
 
-properties (Access = protected)
+properties %(Access = protected)
+    y;  yhat;
     a0;  a_;
     s = obops;
 end
 
 methods
 function o = sbd_template(y, ainit)
-    reset(o, y, ainit);
+    o = reset(set_y(o, y), ainit);
 end
 
-function o = reset(o, y, ainit)
-    if nargin >= 2 && ~isempty(y)
-        o.y = y;
-    end
-    if nargin < 3 || isempty(ainit)
+function o = set_y(o, y)
+    o.y = y;
+    o.yhat = fft(y);
+end
+
+function o = reset(o, ainit)
+    m = numel(o.y);
+    
+    if nargin < 2 || isempty(ainit)
         ainit = numel(o.a0);
     end
     
     if numel(ainit) > 1
         o.a0 = ainit;
     else
-        tmp = mod(randi(numel(o.y)) + (1:ainit), numel(o.y)) + 1;
-        o.a0 = o.y(tmp);
+        o.a0 = o.y(mod(randi(m) + (1:ainit), m) + 1);
     end
-    
     o.a0 = o.a0(:)/norm(o.a0(:));
+    
     o.a = o.a0;  o.a_ = o.a0;
     o.x = [];
     
