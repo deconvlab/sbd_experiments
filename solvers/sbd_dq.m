@@ -25,7 +25,11 @@ function o = step(o)
     o.x = soft(o.x, o.params.lambda);
     xhat = fft(o.x);
     
-    w = o.s.Exp(o.a, o.params.alph * o.s.Log(o.a_, o.a));
+    if o.params.alph > 0
+        w = o.s.Exp(o.a, o.params.alph * o.s.Log(o.a_, o.a));
+    else
+        w = o.a;
+    end
     g = -real(ifft(xhat .* o.yhat));
     g = g(1:numel(w));
     

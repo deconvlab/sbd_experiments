@@ -11,8 +11,8 @@ a0 = randn(p,1);
 a0 = a0/norm(a0);
 
 % Activation / observation
-m = p*1e2;                      % Observation size
-theta = 1e1/p;                  % Bernoulli (sparsity) coefficient
+m = p*3e1;                      % Observation size
+theta = 1e0/p;                  % Bernoulli (sparsity) coefficient
 dist = @(m,n) randn(m,n);       % Distribution of activations
 
 x0 = (rand(m,1) <= theta) .* dist(m,1);
@@ -20,21 +20,23 @@ y = cconv(a0, x0, m);
 
 % Solver properties
 lambda = ones(1,1) * 1e-1;      % Sparsity regularization parameter
-maxit = 1e4;                    % iterations in initial iPALM solve
-tol = 1e-4;
+maxit = 1e3;                    % iterations in initial iPALM solve
+tol = 1e-3;
 
 %% Initialize solver + run some iterations of iPALM
 %solver = sbd_lasso(y, 3*p-2, struct('lambda', lambda(1)));
 solver = sbd_dq(y, 3*p-2, struct('alph', 0.9, 'lambda', lambda(1)));
-%[solver, stats] = iterate(solver, [10 maxit], tol);
+
+%profile on;
 [solver, stats] = solve(solver, [10 maxit], tol, lambda);
+%profile off; profile viewer
 
 %% Plot results
-subplot(221); plot([y cconv(solver.a, solver.x, m)]); xlim([1 m]);
-subplot(222); plot(a0); hold on;
+subplot(141); plot([y cconv(solver.a, solver.x, m)]); xlim([1 m]);
+subplot(142); plot(a0); hold on;
 plot(solver.a); hold off; xlim([1 max(numel(a0), numel(solver.a))]);
-subplot(223); stem([x0 solver.x], '.'); xlim([1 m]);
-subplot(224); plot(cell2mat({stats.costs}));
+subplot(143); stem([x0 solver.x], '.'); xlim([1 m]);
+subplot(144); plot(cell2mat({stats.costs}));
 maxdotshift(a0, solver.a, 0)
 
 %% Done

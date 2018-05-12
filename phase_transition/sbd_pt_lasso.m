@@ -5,21 +5,22 @@ run('../initpkg.m');
 %% Experimental parameters
 % Data properties
 dist = @(m,n) randn(m,n);       % Distribution of activations
-p0 = 50;                        % Fixed kernel size of a0
-p = 2*p0-2;                     % Size of recovery window
+p0 = 1e2;                       % Fixed kernel size of a0
+p = 2*p0-2;                   % Size of recovery window
+%p = ceil(p0*1.1);
 
 trials = 20;                    % Number of trials
-%tfacs = linspace(-2,0,15);      % How to space theta (see below)
-tfacs = linspace(1e-2,1e0,15);  % How to space theta (see below)
-mfacs = linspace(10,200,10);    % How to space m (see below)
+tfacs = linspace(0.01,0.8,15);   % How to space theta (see below)
+mfacs = linspace(20,200,15);    % How to space m (see below)
+%mfacs = 200;
 
-thetas = tfacs; %10.^tfacs;
-ms = p0 * mfacs;
+thetas = tfacs;
+ms = ceil(p0 * mfacs);
 
 % Solver properties
 lambda = [1 1]*1e-1;            % Manually set lambda for each cont. phase
-maxit = 1e4;                    % Max iter. & tol. for solver
-tol = 1e-4;
+maxit = 1e3;                    % Max iter. & tol. for solver
+tol = 1e-3;
 
 %% Initialize solver + run some iterations of iPALM
 tmp = [numel(thetas) numel(ms)];
@@ -29,11 +30,13 @@ a0 = randn(p0,1);  a0 = a0/norm(a0);        % a0 is FIXED
 
 clc;
 warning('OFF', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
+
 for idx = 1:prod(tmp)
     fprintf('Testing %d of %d...\n', idx, prod(tmp));
     [i, j] = ind2sub(tmp, idx);
     theta = thetas(i);  m = ms(j);
 
+    start = tic;
 % WHAT HAPPENS IN EACH TRIAL:
 parfor trial = 1:trials
     % A) Generate x & y: supp(x) must be >= 1
@@ -52,29 +55,34 @@ parfor trial = 1:trials
     obj(idx, trial) = maxdotshift(a0, solver.a);
     its(idx, trial) = solver.it;
 end
-    fprintf('\b\b\b\b: theta = %.3f, m = %d, mean obj. = %.2f.\n', ...
+    fprintf('\b\b\b\b: theta = %.3f, m = %d, mean obj. = %.2f.', ...
         theta, m, mean(obj(idx,:)));
+    fprintf(' Time elapsed: %.1fs.\n', toc(start));
 end
 obj = reshape(obj, [tmp trials]);
 its = reshape(its, [tmp trials]);
 warning('ON', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 disp('Done.');
 
-%% Plots
-tmp = {0.95 'flat'};
+% Plots
+tmp = {0.9 'flat'};
 i = tfacs;  j = mfacs;
 
 clf;
 if min(size(obj,1), size(obj,2)) == 1
     % 1D transition plots
     if size(obj,1) == 1;  tmp{3} = j;  else;  tmp{3} = i;  end
-    yyaxis left;   plot(tmp{3}, mean(squeeze(obj),2));    hold on;
-    plot(tmp{3}, median(squeeze(obj),2));  hold off;
+    yyaxis left;   
+    plot(tmp{3}, median(squeeze(obj),2));  hold on;
+    plot(tmp{3}, mean(squeeze(obj),2));
+    plot(tmp{3}, min(squeeze(obj), [], 2));
+    hold off;
     ylabel('\rho = max_i <S_i[a0], a>');
 
     yyaxis right;    plot(tmp{3}, mean(squeeze(obj) >= tmp{1},2));
-    ylabel(sprintf('P(\rho > %.2f)', tmp{1})); 
-    hold off;
+    ylabel(['P[\rho > ' sprintf('%.2f]', tmp{1})]); 
+    xlabel('p\theta');
+    
 else
     % 2D transition plots
     colormap gray; 
@@ -88,5 +96,5 @@ else
     view(2); shading(tmp{2});  title('Success prob.');
 end
 
-%% End of experiment
+% End of experiment
 beep

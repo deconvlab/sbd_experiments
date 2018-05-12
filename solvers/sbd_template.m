@@ -7,7 +7,7 @@ properties
     it;
 end
 
-properties %(Access = protected)
+properties (Access = protected)
     y;  yhat;
     a0;  a_;
     s = obops;
