@@ -67,7 +67,7 @@ its = reshape(its, [tmp trials]);
 warning('ON', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 disp('Done.');
 
-% Plots
+%% Plots
 tmp = {0.9 'flat'};
 i = log10(thetas);  j = log10(p0s);         % *params
 
@@ -91,12 +91,18 @@ else
     colormap gray; 
     subplot(131); surf(i, j, mean(obj,3)'); 
     view(2); shading(tmp{2});  title('Mean of \rho');
+    xlim([i(1) i(end)]); ylim([j(1) j(end)]);
+    xlabel('log(\theta)'); ylabel('log(p)');
     
     subplot(132); surf(i, j, median(obj,3)'); 
     view(2); shading(tmp{2});  title('Median of \rho');
+    xlim([i(1) i(end)]); ylim([j(1) j(end)]);
+    xlabel('log(\theta)'); ylabel('log(p)');
     
     subplot(133); surf(i, j, mean(obj>=tmp{1},3)'); 
     view(2); shading(tmp{2});  title('Success prob.');
+    xlim([i(1) i(end)]); ylim([j(1) j(end)]);
+    xlabel('log(\theta)'); ylabel('log(p)');
 end
 
 % End of experiment
