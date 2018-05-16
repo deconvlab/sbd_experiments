@@ -1,15 +1,18 @@
 %% SBD1 Phase transition
-clear; clc; %#ok<*PFBNS>
+clear; %clc; %#ok<*PFBNS>
 run('../initpkg.m');
 
 %% Settings
 % Data *params
 dist = @(m,n) randn(m,n);       % Distribution of activations
-thetas = 10.^linspace(-2.5, -1.5, 10);
-p0s = ceil(10.^linspace(2.5, 4.5, 10));
+%thetas = 10.^linspace(-2.5, -1.5, 5);
+%p0s = ceil(10.^linspace(2.5, 4.5, 5));
+
+thetas = 10.^linspace(-2.5, -2, 10);
+p0s = ceil(10.^linspace(3, 4, 10));
 
 % Experimental settings
-trials = 10;                    % Number of trials
+trials = 1;                     % Number of trials
 maxit = 1e3;                    % Max iter. & tol. for solver
 tol = 1e-3;
 
@@ -20,18 +23,19 @@ its = NaN(prod(tmp), trials);
 times = NaN(trials,1);
 
 %% Experimental iterations
-clc;
+%clc;
 warning('OFF', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 
-for idx = 1:prod(tmp)
-    fprintf('Testing %d of %d...\n', idx-1, prod(tmp)-1);
-    [i, j] = ind2sub(tmp, idx);
+for idx = 0:prod(tmp)-1
+    fprintf('Testing %d of %d...\n', idx, prod(tmp)-1);
+    idx_1 = idx+1;
+    [i, j] = ind2sub(tmp, idx_1);
 
     theta = thetas(i); p0 = p0s(j);         % *params
     a0 = randn(p0,1);  a0 = a0/norm(a0);
     
     m = 100 * p0;
-    lambda = 1/sqrt(p0*theta);
+    lambda = 0.8/sqrt(p0*theta);
 
     start = tic;
 % WHAT HAPPENS IN EACH TRIAL:
@@ -49,15 +53,15 @@ parfor trial = 1:trials
     solver = solve(solver, [10 maxit], tol, lambda);
     
     % C) Record statistics
-    obj(idx, trial) = maxdotshift(a0, solver.a);
-    its(idx, trial) = solver.it;
+    obj(idx_1, trial) = maxdotshift(a0, solver.a);
+    its(idx_1, trial) = solver.it;
 end
     fprintf('\b\b\b\b: p0 = %d, theta = %.2E, mean obj. = %.2f.', ...
-        p0, theta, mean(obj(idx,:)));       % *params
-    times(idx) = toc(start);
-    fprintf(' Time elapsed: %.1fs.\n', times(idx));
+        p0, theta, mean(obj(idx_1,:)));       % *params
+    times(idx_1) = toc(start);
+    fprintf(' Time elapsed: %.1fs.\n', times(idx_1));
 end
-%
+%%
 obj = reshape(obj, [tmp trials]);
 its = reshape(its, [tmp trials]);
 warning('ON', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
