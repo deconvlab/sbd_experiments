@@ -2,39 +2,36 @@
 clear; clc; %#ok<*PFBNS>
 run('../initpkg.m');
 
-%% Experimental parameters
-% Data properties
+%% Settings
+% Data *params
 dist = @(m,n) randn(m,n);       % Distribution of activations
-p0 = 1e4;                       % Fixed kernel size of a0
-p = 3*p0-2;                     % Size of recovery window
-%p = ceil(p0*1.1);
+thetas = 10.^linspace(-2.5, -1.5, 10);
+p0s = ceil(10.^linspace(2.5, 4.5, 10));
 
+% Experimental settings
 trials = 10;                    % Number of trials
-tfacs = linspace(1,20,10);      % How to space theta (see below)
-mfacs = linspace(20,200,10);    % How to space m (see below)
-%mfacs = 200;
-
-thetas = tfacs/p0;
-ms = ceil(p0 * mfacs);
-
-% Solver properties
-lambda = 1e-1;                  % Manually set lambda for each cont. phase
 maxit = 1e3;                    % Max iter. & tol. for solver
 tol = 1e-3;
 
-%% Initialize solver + run some iterations of iPALM
-tmp = [numel(thetas) numel(ms)];
+%% Containers
+tmp = [numel(thetas) numel(p0s)];       % *params
 obj = NaN(prod(tmp), trials);
 its = NaN(prod(tmp), trials);
-a0 = randn(p0,1);  a0 = a0/norm(a0);        % a0 is FIXED
+times = NaN(trials,1);
 
+%% Experimental iterations
 clc;
 warning('OFF', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 
 for idx = 1:prod(tmp)
-    fprintf('Testing %d of %d...\n', idx, prod(tmp));
+    fprintf('Testing %d of %d...\n', idx-1, prod(tmp)-1);
     [i, j] = ind2sub(tmp, idx);
-    theta = thetas(i);  m = ms(j);
+
+    theta = thetas(i); p0 = p0s(j);         % *params
+    a0 = randn(p0,1);  a0 = a0/norm(a0);
+    
+    m = 100 * p0;
+    lambda = 1/sqrt(p0*theta);
 
     start = tic;
 % WHAT HAPPENS IN EACH TRIAL:
@@ -48,25 +45,27 @@ parfor trial = 1:trials
     y = cconv(a0, x0, m);
     
     % B) Create solver and run continuation sequence
-    solver = sbd_dq(y, p, struct('lambda', lambda(1)));
+    solver = sbd_dq(y, 3*p0-2, struct('lambda', lambda));
     solver = solve(solver, [10 maxit], tol, lambda);
     
     % C) Record statistics
     obj(idx, trial) = maxdotshift(a0, solver.a);
     its(idx, trial) = solver.it;
 end
-    fprintf('\b\b\b\b: theta = %.3f, m = %d, mean obj. = %.2f.', ...
-        theta, m, mean(obj(idx,:)));
-    fprintf(' Time elapsed: %.1fs.\n', toc(start));
+    fprintf('\b\b\b\b: p0 = %d, theta = %.2E, mean obj. = %.2f.', ...
+        p0, theta, mean(obj(idx,:)));       % *params
+    times(idx) = toc(start);
+    fprintf(' Time elapsed: %.1fs.\n', times(idx));
 end
+%
 obj = reshape(obj, [tmp trials]);
 its = reshape(its, [tmp trials]);
 warning('ON', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 disp('Done.');
 
-%% Plots
+% Plots
 tmp = {0.9 'flat'};
-i = tfacs;  j = mfacs;
+i = log10(thetas);  j = log10(p0s);         % *params
 
 clf;
 if min(size(obj,1), size(obj,2)) == 1

@@ -4,28 +4,30 @@ run('initpkg.m');
 
 %% Generate some synthetic data, activation map values are {0,1}.
 % Kernel
-p = 1e4;                         % Size of the (short) kernel
+p = 1e2;                         % Size of the (short) kernel
 
 a0 = randn(p,1);
 %a0 = normpdf(1:p, (p+1)/2, p/10)';
 a0 = a0/norm(a0);
 
 % Activation / observation
-m = p*3e1;                      % Observation size
-theta = 1e0/p;                  % Bernoulli (sparsity) coefficient
+m = 1e3*2;                      % Observation size
+%m = p*3e1;
+theta = 1e-1;                   % Bernoulli (sparsity) coefficient
+%theta = 1e0/p;
 dist = @(m,n) randn(m,n);       % Distribution of activations
 
 x0 = (rand(m,1) <= theta) .* dist(m,1);
 y = cconv(a0, x0, m);
 
 % Solver properties
-lambda = ones(1,1) * 1e-1;      % Sparsity regularization parameter
+lambda = ones(2,1) * 1e-1;      % Sparsity regularization parameter
 maxit = 1e3;                    % iterations in initial iPALM solve
 tol = 1e-3;
 
 %% Initialize solver + run some iterations of iPALM
-%solver = sbd_lasso(y, 3*p-2, struct('lambda', lambda(1)));
-solver = sbd_dq(y, 3*p-2, struct('alph', 0.9, 'lambda', lambda(1)));
+solver = sbd_lasso(y, 3*p-2, struct('lambda', lambda(1)));
+%solver = sbd_dq(y, 3*p-2, struct('alph', 0.9, 'lambda', lambda(1)));
 
 %profile on;
 [solver, stats] = solve(solver, [10 maxit], tol, lambda);
