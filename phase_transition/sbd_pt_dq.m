@@ -68,7 +68,7 @@ warning('ON', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 disp('Done.');
 
 %% Plots
-tmp = {0.9 'flat'};
+tmp = {0.97 'flat'};
 i = log10(thetas);  j = log10(p0s);         % *params
 
 clf;
