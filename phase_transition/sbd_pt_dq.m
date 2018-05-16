@@ -12,7 +12,7 @@ thetas = 10.^linspace(-2.5, -2, 10);
 p0s = ceil(10.^linspace(3, 4, 10));
 
 % Experimental settings
-trials = 1;                     % Number of trials
+trials = 20;                    % Number of trials
 maxit = 1e3;                    % Max iter. & tol. for solver
 tol = 1e-3;
 
