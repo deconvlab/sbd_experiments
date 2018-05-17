@@ -20,8 +20,8 @@ lambda = 1e-1;              % Sparsity regularization parameter
 eta = 1.01;                 % Rate to increase lambda
 ldamax = 0.5;               % Max lambda
 
-maxit = 1e3;
-trials = 20;
+maxit = 6e2;
+trials = 10;
 
 s1 = cell(trials,1);  s2 = s1;
 for t = 1:trials
@@ -32,6 +32,7 @@ end
 updates = [ 1 2:2:10 ...    % when to print updates
             50:50:200 ...
             400:200:max(maxit)];
+updates = 1:maxit;OP
 
 %% Run iterations
 A1s = repmat({NaN(p)}, [trials maxit]);  A2s = A1s;
