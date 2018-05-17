@@ -5,6 +5,7 @@
 *.m~
 
 *.swp
+*.save
 
 # Temporary results
 **/tmp.mat
