@@ -12,7 +12,7 @@ resz = 2;
 Y = imresize(Y,resz);
 p = [10 10] * resz;
 
-%% Initialize an iPALM iterator for the SBD problem. 
+%% Initialize an iPALM iterator for the SBD problem.
 xpos = true;                % Recover a nonnegative activation map
 getbias = true;             % Recover a constant bias
 lambda = 1e-1;              % Sparsity regularization parameter
@@ -40,11 +40,9 @@ i0 = 1;  loopscript;
 save('./realdata_ldaupdate/tmp.mat');
 
 %% Plot dot product
-dot1 = NaN(trials, maxit);  dot2 = dot1;
-for t = 1:trials
-    dot1(t,:) = A1s{t}(:,end)' * A1s{t};
-    dot2(t,:) = A1s{t}(:,end)' * A2s{t};
-end
+dotscript;
+clearvars A1s A2s
+save('./realdata_ldaupdate/rd_tmp.mat')
 subplot(212);  plot([dot1; dot2]');
 
 
