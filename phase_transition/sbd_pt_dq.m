@@ -26,7 +26,7 @@ idx0 = 0;
 addpath('./sbd_pt_dq')
 run('../initpkg.m');
 
-loopscript;
+loopscript;  save('./sbd_pt_dq/tmp.mat');
 plotscript;
 
 rmpath('./sbd_pt_dq')

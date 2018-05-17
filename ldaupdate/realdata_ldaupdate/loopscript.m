@@ -1,6 +1,6 @@
 for i = i0:maxit
     stime = tic;
-    parfor t = 1:trials
+    for t = 1:trials
         s1{t} = iterate(s1{t});
         s2{t} = iterate(s2{t});
         
@@ -18,7 +18,7 @@ for i = i0:maxit
             'Costs: [%.2E %.2E]. Elapsed time %.2fs.\n'], ...
             i, s2{1}.cost, s2{1}.cost, toc(stime));
     end
-    save('./realdata_ldaupdate/tmp.mat');
+    %save('./realdata_ldaupdate/tmp.mat');
 end
 A1s = cellfun(@(A) reshape(A, prod(p), 1), A1s, 'UniformOutput', 0);
 A1s = arrayfun(@(t) cell2mat(A1s(t,:)), 1:trials, 'UniformOutput', 0);

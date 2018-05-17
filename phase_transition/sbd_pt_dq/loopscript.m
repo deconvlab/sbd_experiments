@@ -12,7 +12,7 @@ for idx = idx0:prod(tmp)-1
 
     start = tic;
 % WHAT HAPPENS IN EACH TRIAL:
-parfor trial = 1:trials
+for trial = 1:trials
     % A) Generate x & y: supp(x) must be >= 1
     xgood = false;
     while ~xgood
@@ -33,7 +33,7 @@ end
         p0, theta, mean(obj(idx_1,:)));       % *params
     times(idx_1) = toc(start);
     fprintf(' Time elapsed: %.1fs.\n', times(idx_1));
-    save('dq_tmp.mat');
+    % save('tmp.mat');
 end
 %%
 warning('ON', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
