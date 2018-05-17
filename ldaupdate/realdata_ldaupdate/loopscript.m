@@ -20,6 +20,10 @@ for i = i0:maxit
     end
     save('./realdata_ldaupdate/tmp.mat');
 end
-As = cellfun(@(A) reshape(A, prod(p), 1), As, 'UniformOutput', 0);
-As = arrayfun(@(t) cell2mat(As(t,:)), 1:trials, 'UniformOutput', 0);
+A1s = cellfun(@(A) reshape(A, prod(p), 1), A1s, 'UniformOutput', 0);
+A1s = arrayfun(@(t) cell2mat(A1s(t,:)), 1:trials, 'UniformOutput', 0);
+A2s = cellfun(@(A) reshape(A, prod(p), 1), A2s, 'UniformOutput', 0);
+A2s = arrayfun(@(t) cell2mat(A2s(t,:)), 1:trials, 'UniformOutput', 0);
+
+
 disp(' ');
