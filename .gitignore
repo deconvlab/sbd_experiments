@@ -3,3 +3,8 @@
 
 # OSX / *nix default autosave extension
 *.m~
+
+*.swp
+
+# Temporary results
+*/tmp.mat
