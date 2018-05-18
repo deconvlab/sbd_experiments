@@ -5,7 +5,8 @@ t = 0.95;
 nticks = 6;
 
 figure(1); clf; colormap gray;
-imagesc(flipud(mean(obj >= t, 3)'));
+%imagesc(flipud(mean(obj >= t, 3)'));
+imagesc(flipud(min(obj, [], 3)'));
 axis equal; 
 xlim([0.5 size(obj,1)+0.5]);
 ylim([0.5 size(obj,2)+0.5]);
