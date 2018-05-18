@@ -12,7 +12,7 @@ for idx = idx0:prod(tmp)-1
 
     start = tic;
 % WHAT HAPPENS IN EACH TRIAL:
-for trial = 1:trials
+parfor trial = 1:trials
     % A) Generate x & y: supp(x) must be >= 1
     xgood = false;
     while ~xgood
