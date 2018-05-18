@@ -39,12 +39,13 @@ A1s = repmat({NaN(p)}, [trials maxit]);  A2s = A1s;
 i0 = 1;  loopscript;
 save('./realdata_ldaupdate/tmp.mat');
 
-%% Plot dot product
 dotscript;
 clearvars A1s A2s
 save('./realdata_ldaupdate/rd_tmp.mat')
-subplot(212);  plot([dot1; dot2]');
 
+%% Plot dot product
+load('./realdata_ldaupdate/rd_tmp.mat')
+subplot(212);  plot([mean(dot1,1); mean(dot2,1)]');
 
 %% Finished experiment
 rmpath('./realdata_ldaupdate');

@@ -61,10 +61,10 @@ for I = 1:nexp
 end
 
 save exp_ldaupdate stats_lasso_var stats_lasso_fix ...
-                   stats_dq_var    stats_dq_fix
+                   stats_dq_var    stats_dq_fix     nexp
 
 %% Plot Result 
-figure(1); hold on; box on;
+figure(1); clf; hold on; box on;
 plot(sum(2-2*stats_lasso_fix.dists,1)/20,'x','linewidth',3);
 plot(sum(2-2*stats_lasso_var.dists,1)/20,'x','linewidth',3);
 plot(sum(2-2*stats_dq_fix.dists,1)/nexp,'linewidth',3);
@@ -84,7 +84,7 @@ legend({'$(P_{\mathrm{lasso}})\lambda_{(i)} = \lambda_{(0)}$','$(P_{\mathrm{lass
 xlabel('iteration number','interpreter','latex','fontsize',16);
 ylabel('$d^2(a,\mathcal{D})$','interpreter','latex','fontsize',16);
 plot(1:800,0.1*ones(800,1),'--k');
-
+hold off;
 
 %% Done
 beep
