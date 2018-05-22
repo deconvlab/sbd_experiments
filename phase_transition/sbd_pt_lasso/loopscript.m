@@ -1,7 +1,7 @@
 %#ok<*SAGROW>
 warning('OFF', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 for idx = idx0:prod(tmp)-1
-    fprintf('Testing %d of %d... ', idx, prod(tmp)-1);
+    fprintf('[%5d|%5d]:  ', idx, prod(tmp)-1);
     idx_1 = idx+1;
     [i, j] = ind2sub(tmp, idx_1);
 
@@ -34,6 +34,7 @@ end
         p0, theta, mean(obj(idx_1,:)));       % *params
     times(idx_1) = toc(start); 
     fprintf(' Time elapsed: %.1fs.\n', times(idx_1));
+    if i == numel(thetas);  disp(' ');  end
     % save('tmp.mat');
 end
 %%
