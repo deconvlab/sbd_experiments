@@ -1,3 +1,4 @@
+%#ok<*SAGROW>
 warning('OFF', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 for idx = idx0:prod(tmp)-1
     fprintf('Testing %d of %d... ', idx, prod(tmp)-1);
@@ -7,7 +8,7 @@ for idx = idx0:prod(tmp)-1
     theta = thetas(i); p0 = p0s(j);         % *params
     a0 = randn(p0,1);  a0 = a0/norm(a0);
 
-    m = 100 * p0;
+    m = 20 * p0;
     lambda = 0.8/sqrt(p0*theta);
 
     start = tic;
@@ -22,7 +23,7 @@ parfor trial = 1:trials
     y = cconv(a0, x0, m);
 
     % B) Create solver and run continuation sequence
-    solver = sbd_dq(y, 3*p0-2, struct('lambda', lambda));
+    solver = sbd_lasso(y, 2*p0-2, struct('lambda', lambda));
     solver = solve(solver, [10 maxit], tol, lambda);
 
     % C) Record statistics
@@ -31,7 +32,7 @@ parfor trial = 1:trials
 end
     fprintf('p0 = %d, theta = %.2E, mean obj. = %.2f.', ...
         p0, theta, mean(obj(idx_1,:)));       % *params
-    times(idx_1) = toc(start);
+    times(idx_1) = toc(start); 
     fprintf(' Time elapsed: %.1fs.\n', times(idx_1));
     % save('tmp.mat');
 end
