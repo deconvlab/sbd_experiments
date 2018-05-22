@@ -1,17 +1,17 @@
 %% SBD1 Phase transition
 clear; %clc; %#ok<*PFBNS>
-initpkg;
+run('../initpkg.m');
 
 %% Settings
 % Data *params
 dist = @(m,n) randn(m,n);       % Distribution of activations
 
-thetas = 10.^linspace(-2.5, -2, 15);
-p0s = ceil(10.^linspace(2, 3, 15));
+thetas = 10.^linspace(-1, -0.6, 10);
+p0s = ceil(10.^linspace(1.6, 2, 10));
 
 % Experimental settings
 trials = 1;                    % Number of trials
-maxit = 1e3;                    % Max iter. & tol. for solver
+maxit = 1e3;                   % Max iter. & tol. for solver
 tol = 1e-3;
 
 %% Containers
@@ -25,8 +25,8 @@ idx0 = 0;
 addpath('./sbd_pt_lasso')
 run('../initpkg.m');
 
-loopscript;  save('./sbd_pt_lasso/tmp.mat');
-plotscript;  export_fig ./sbd_pt_lasso/tmp.pdf -transparent
+loopscript;  save('./sbd_pt_lasso/dq_tmp.mat');
+plotscript;  % export_fig ./sbd_pt_lasso/tmp.pdf -transparent
 
 rmpath('./sbd_pt_lasso')
 beep

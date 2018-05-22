@@ -1,4 +1,4 @@
-tmp = {0.97 'flat'};
+tmp = {0.95 'flat'};
 i = log10(thetas);  j = log10(p0s);         % *params
 
 clf;
