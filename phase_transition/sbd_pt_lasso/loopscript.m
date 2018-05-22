@@ -8,7 +8,7 @@ for idx = idx0:prod(tmp)-1
     theta = thetas(i); p0 = p0s(j);         % *params
     a0 = randn(p0,1);  a0 = a0/norm(a0);
 
-    m = 10 * p0;
+    m = 50 * p0;
     lambda = [1 0.8] * 0.8/sqrt(p0*theta);
 
     start = tic;
