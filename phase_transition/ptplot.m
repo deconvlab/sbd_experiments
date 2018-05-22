@@ -1,12 +1,15 @@
-%clear; load('sbd_pt_dq/dq4.mat', 'obj', 'thetas', 'p0s');
+function ptplot(fname, pltcrit, nticks)
+load(fname, 'p0s', 'thetas', 'obj');
 
-%%
-t = 0.90;
-nticks = 6;
+if nargin <= 2 || isempty(pltcrit); pltcrit = 0.9;  end
+if nargin <= 3 || isempty(nticks);  nticks = 6;     end
 
-figure(1); clf; colormap gray;
-%imagesc(flipud(mean(obj >= t, 3)'));
-imagesc(flipud(min(obj, [], 3)'));
+if isscalar(pltcrit)
+    pltcrit = @(obj) mean(obj >= pltcrit, 3);
+end
+
+colormap gray;
+imagesc(flipud(pltcrit(obj)'));
 axis equal; 
 xlim([0.5 size(obj,1)+0.5]);
 ylim([0.5 size(obj,2)+0.5]);
@@ -16,7 +19,7 @@ ylabel('$\log_{10}(p)$','interpreter','latex','fontsize',16);
 
 set(gca,'TickLabelInterpreter','latex');
 ticks = linspace(1,size(obj,1),nticks);
-tlabels = linspace(log10(thetas(1)),log10(thetas(end)),nticks);
+tlabels = linspace(log10(thetas(1)),log10(thetas(end)),nticks); 
 xticks(ticks);
 xticklabels(tlabels);
 
@@ -32,3 +35,6 @@ plot([0 size(obj,1)+1], [0 1/2 * r*size(obj,2)+1], '-.', 'linewidth', 3);
 hold off;
 legend({'$\theta = p^{-3/4}$', '$\theta = p^{-1/2}$'}, ...
     'interpreter', 'latex', 'fontsize',14);
+end
+
+%#ok<*COLND>
