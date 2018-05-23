@@ -2,7 +2,7 @@ function ptplot(fname, pltcrit, lines, nticks)
 load(fname, 'p0s', 'thetas', 'obj');
 
 if nargin < 2 || isempty(pltcrit);  pltcrit = 0.9;      end
-if nargin < 3 || isempty(nticks);   nticks = [6 6];     end
+if nargin < 4 || isempty(nticks);   nticks = [6 6];     end
 
 if isscalar(pltcrit)
     pltcrit = @(obj) mean(obj >= pltcrit, 3);
@@ -30,15 +30,17 @@ tlabels = linspace(y(end),y(1),nticks(2));
 yticks(ticks);
 yticklabels(tlabels);
 
-hold on;
-lgd = cell(size(lines,1),1);
-for l = 1:size(lines,1)
-    xs = ([lines(l,1) lines(l,2)]-x(1))*(size(obj,1)+1)/(x(end)-x(1));
-    ys = (y(end)-[lines(l,3) lines(l,4)])*(size(obj,2)+1)/(y(end)-y(1));
-    plot(xs, ys, '--', 'linewidth', 3);
+if nargin >= 3 && ~isempty(lines)
+    hold on;
+    lgd = cell(size(lines,1),1);
+    for l = 1:size(lines,1)
+        xs = ([lines(l,1) lines(l,2)]-x(1))*(size(obj,1)+1)/(x(end)-x(1));
+        ys = (y(end)-[lines(l,3) lines(l,4)])*(size(obj,2)+1)/(y(end)-y(1));
+        plot(xs, ys, '--', 'linewidth', 3);
     
-    lgd{l} = sprintf('$\\theta = p^{%.1f}$', ...
-        (lines(l,2)-lines(l,1))/(lines(l,4)-lines(l,3)));
+        lgd{l} = sprintf('$\\theta \\simeq p^{%.1f}$', ...
+            (lines(l,2)-lines(l,1))/(lines(l,4)-lines(l,3)));
+    end
 end
 hold off;
 legend(lgd, 'interpreter', 'latex', 'fontsize',14);

@@ -8,8 +8,8 @@ for idx = idx0:prod(tmp)-1
     theta = thetas(i); p0 = p0s(j);         % *params
     a0 = randn(p0,1);  a0 = a0/norm(a0);
 
-    m = 50 * p0;
-    lambda = [1 0.8] * 0.8/sqrt(p0*theta);
+    m = 1e2 * p0;
+    lambda = [1 0.9] * 0.8/sqrt(p0*theta);
 
     start = tic;
 % WHAT HAPPENS IN EACH TRIAL:
@@ -27,7 +27,7 @@ parfor trial = 1:trials
     solver = solve(solver, [10 maxit], tol, lambda);
 
     % C) Record statistics
-    obj(idx_1, trial) = maxdotshift(a0, solver.a, 0);
+    obj(idx_1, trial) = maxdotshift(a0, solver.a);
     its(idx_1, trial) = solver.it;
 end
     fprintf('p0 = %d, theta = %.2E, mean obj. = %.2f.', ...
