@@ -1,12 +1,14 @@
-function ptplot(fname, pltcrit, nticks)
+function ptplot(fname, pltcrit, lines, nticks)
 load(fname, 'p0s', 'thetas', 'obj');
 
-if nargin <= 2 || isempty(pltcrit); pltcrit = 0.9;  end
-if nargin <= 3 || isempty(nticks);  nticks = 6;     end
+if nargin < 2 || isempty(pltcrit);  pltcrit = 0.9;      end
+if nargin < 3 || isempty(nticks);   nticks = [6 6];     end
 
 if isscalar(pltcrit)
     pltcrit = @(obj) mean(obj >= pltcrit, 3);
 end
+
+x = log10(thetas);  y = log10(p0s);
 
 colormap gray;
 imagesc(flipud(pltcrit(obj)'));
@@ -18,23 +20,28 @@ xlabel('$\log_{10}(\theta)$','interpreter','latex','fontsize',16);
 ylabel('$\log_{10}(p)$','interpreter','latex','fontsize',16);
 
 set(gca,'TickLabelInterpreter','latex');
-ticks = linspace(1,size(obj,1),nticks);
-tlabels = linspace(log10(thetas(1)),log10(thetas(end)),nticks); 
+ticks = linspace(1,size(obj,1),nticks(1));
+tlabels = linspace(x(1),x(end),nticks(1)); 
 xticks(ticks);
 xticklabels(tlabels);
 
-ticks = linspace(1,size(obj,2),nticks);
-tlabels = linspace(log10(p0s(end)),log10(p0s(1)),nticks);
+ticks = linspace(1,size(obj,2),nticks(2));
+tlabels = linspace(y(end),y(1),nticks(2));
 yticks(ticks);
 yticklabels(tlabels);
 
 hold on;
-r = log10(p0s(end)/p0s(1))/log10(thetas(end)/thetas(1));
-plot([0 size(obj,1)+1], [0 3/4 * r*size(obj,2)+1], 'r--', 'linewidth', 3);
-plot([0 size(obj,1)+1], [0 1/2 * r*size(obj,2)+1], '-.', 'linewidth', 3);
+lgd = cell(size(lines,1),1);
+for l = 1:size(lines,1)
+    xs = ([lines(l,1) lines(l,2)]-x(1))*(size(obj,1)+1)/(x(end)-x(1));
+    ys = (y(end)-[lines(l,3) lines(l,4)])*(size(obj,2)+1)/(y(end)-y(1));
+    plot(xs, ys, '--', 'linewidth', 3);
+    
+    lgd{l} = sprintf('$\\theta = p^{%.1f}$', ...
+        (lines(l,2)-lines(l,1))/(lines(l,4)-lines(l,3)));
+end
 hold off;
-legend({'$\theta = p^{-3/4}$', '$\theta = p^{-1/2}$'}, ...
-    'interpreter', 'latex', 'fontsize',14);
+legend(lgd, 'interpreter', 'latex', 'fontsize',14);
 end
 
 %#ok<*COLND>

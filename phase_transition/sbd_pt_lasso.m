@@ -25,7 +25,7 @@ idx0 = 0;
 addpath('./sbd_pt_lasso')
 run('../initpkg.m');
 
-loopscript;  save('./sbd_pt_lasso/dq_tmp.mat');
+loopscript;  save('./sbd_pt_lasso/lasso_tmp.mat');
 plotscript;  % export_fig ./sbd_pt_lasso/tmp.pdf -transparent
 
 rmpath('./sbd_pt_lasso')
