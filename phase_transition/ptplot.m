@@ -1,5 +1,5 @@
 function ptplot(fname, pltcrit, lines, nticks)
-load(fname, 'p0s', 'thetas', 'obj');
+load(fname, 'p0s', 'thetas', 'obj', 'logt', 'logp');
 
 if nargin < 2 || isempty(pltcrit);  pltcrit = 0.9;      end
 if nargin < 4 || isempty(nticks);   nticks = [6 6];     end
@@ -8,8 +8,8 @@ if isscalar(pltcrit)
     pltcrit = @(obj) mean(obj >= pltcrit, 3);
 end
 
-if exist('logt','var'); x=logt;  else; x= log10(thetas);  end
-if exist('logp','var'); y=logp;  else; y = log10(p0s);    end
+if exist('logt','var'); x=logt;  else; x=log10(thetas); end
+if exist('logp','var'); y=logp;  else; y=log10(p0s);    end
 
 colormap gray;
 imagesc(flipud(pltcrit(obj)'));
