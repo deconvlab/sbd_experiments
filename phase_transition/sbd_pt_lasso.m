@@ -6,11 +6,12 @@ run('../initpkg.m');
 % Data *params
 dist = @(m,n) randn(m,n);       % Distribution of activations
 
-thetas = 10.^linspace(-1.5, -0.5, 10);
-p0s = ceil(10.^linspace(2.5, 3.5, 10));
+logt = linspace(-1.2, -0.7, 10);
+logp = linspace(2.5, 3.5, 10);
+thetas = 10.^logt;  p0s = ceil(10.^logp);
 
 % Experimental settings
-trials = 5;                    % Number of trials
+trials = 10;                   % Number of trials
 maxit = 1e3;                   % Max iter. & tol. for solver
 tol = 1e-3;
 

@@ -8,11 +8,12 @@ if isscalar(pltcrit)
     pltcrit = @(obj) mean(obj >= pltcrit, 3);
 end
 
-x = log10(thetas);  y = log10(p0s);
+if exist('logt','var'); x=logt;  else; x= log10(thetas);  end
+if exist('logp','var'); y=logp;  else; y = log10(p0s);    end
 
 colormap gray;
 imagesc(flipud(pltcrit(obj)'));
-axis equal; 
+axis equal;
 xlim([0.5 size(obj,1)+0.5]);
 ylim([0.5 size(obj,2)+0.5]);
 
@@ -21,7 +22,7 @@ ylabel('$\log_{10}(p)$','interpreter','latex','fontsize',16);
 
 set(gca,'TickLabelInterpreter','latex');
 ticks = linspace(1,size(obj,1),nticks(1));
-tlabels = linspace(x(1),x(end),nticks(1)); 
+tlabels = linspace(x(1),x(end),nticks(1));
 xticks(ticks);
 xticklabels(tlabels);
 
@@ -37,7 +38,7 @@ if nargin >= 3 && ~isempty(lines)
         xs = ([lines(l,1) lines(l,2)]-x(1))*(size(obj,1)+1)/(x(end)-x(1));
         ys = (y(end)-[lines(l,3) lines(l,4)])*(size(obj,2)+1)/(y(end)-y(1));
         plot(xs, ys, '--', 'linewidth', 3);
-    
+
         lgd{l} = sprintf('$\\theta \\simeq p^{%.1f}$', ...
             (lines(l,2)-lines(l,1))/(lines(l,4)-lines(l,3)));
     end
