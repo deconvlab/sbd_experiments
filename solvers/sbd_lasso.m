@@ -38,7 +38,11 @@ function o = step(o)
     g = real(ifft(conj(xhat) .* (xhat .* fft(w, numel(o.x)) - o.yhat)));
     g = g(1:numel(w));
     
-    t = 0.99/max(abs(xhat))^2;
+    if isfield(o.params, 'stepsz')
+        t = o.params.stepsz;
+    else
+        t = 0.99/max(abs(xhat))^2;
+    end
     o.a_ = o.a;
     o.a = o.s.Exp(w, -t*o.s.e2rgrad(w, g));
     o.it = o.it + 1;

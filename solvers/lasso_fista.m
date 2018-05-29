@@ -14,7 +14,9 @@ end
 
 methods
 function o = lasso_fista(params)
-    o = set_params(o, params);
+    if nargin >= 1
+        o = set_params(o, params);
+    end
 end
 
 function o = reset(o)
