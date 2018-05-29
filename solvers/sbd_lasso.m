@@ -8,6 +8,7 @@ function o = sbd_lasso(y, ainit, params, xparams)
     o = o@sbd_template(y, ainit);
     o.xsolver = set_y(o.xsolver, y);
     
+    o.params.stepsz = [];
     if nargin >= 3 && ~isempty(params)
         o = set_params(o, params);
     end
@@ -38,7 +39,7 @@ function o = step(o)
     g = real(ifft(conj(xhat) .* (xhat .* fft(w, numel(o.x)) - o.yhat)));
     g = g(1:numel(w));
     
-    if isfield(o.params, 'stepsz')
+    if ~isempty(o.params.stepsz)
         t = o.params.stepsz;
     else
         t = 0.99/max(abs(xhat))^2;

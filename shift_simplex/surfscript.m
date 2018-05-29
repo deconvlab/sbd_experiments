@@ -5,7 +5,7 @@ if plotsurf
 end
 
 if plotcontour
-    contour(gsamps, gsamps, phi_g);  hold on;
+    contour(gsamps, gsamps, phi_g, 20);  hold on;
     colormap parula
 end
 

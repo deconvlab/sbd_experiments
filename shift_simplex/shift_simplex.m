@@ -4,17 +4,17 @@ run('../initpkg.m');
 plotsurf = false;  plotcontour = true; %#ok<*NASGU>
 
 %% Problem setup
-p = 32;
+p = 100;
 a0 = randn(p,1);  a0 = a0/norm(a0);
 
 m = 1024;                       % Observation size
-theta = 2e-1;                   % Bernoulli (sparsity) coefficient
+theta = 2/sqrt(p);            % Bernoulli (sparsity) coefficient
 dist = @(m,n) randn(m,n);       % Distribution of activations
 x0 = (rand(m,1) <= theta) .* dist(m,1);
 
 y = cconv(a0, x0, m);
 
-lambda = 0.1;
+lambda = 0.8/sqrt(p*theta);
 
 %% Calculate phi over the simplex
 gsamps = linspace(-0.25,1.25, 1e2);        % coordinates on grid space
@@ -25,7 +25,7 @@ Cinv = inv(C);
 d = [0.5; 0.5 + sqrt(3)/4];
 
 % Shifts
-s = 4;  s = -ceil(p/s):ceil(p/s);
+s = 20;  s = -ceil(p/s):ceil(p/s);
 s = s(randperm(numel(s), 3));
 s = [0 s(s~=0)];  s = s(1:3);
 
@@ -66,6 +66,7 @@ a = a/norm(a);
 solvers = {
     sbd_lasso(y, a, struct('alph',0, 'stepsz', 0.99/max(La(:))))
     sbd_lasso(y, a, struct('alph',0.9, 'stepsz', 0.99/max(La(:))))
+    sbd_lasso(y, a, struct('alph',0, 'stepsz', 100*0.99/max(La(:))))
     };
 
 phi = arrayfun(@(~) evaluate(set_y(lasso_fista(), y), a, lambda), ...
@@ -93,12 +94,13 @@ end
 %% Plotting
 clf; hold off;
 
-lgd = {'RGD', 'ARGD'};
+lgd = {'RGD', 'ARGD', 'RGDx5'};
 colors = [1 .4 .3; 1 0 1; 0 0.5 0];
 sym = {'s', 'd', '^'};
-pit = ceil(sum(costs{1}>=costs{1}(end)+1e-1) * 0.99);
-%pidxs = 1:10:pit+1;
-pidxs = round(linspace(1, pit+1, 20));
+pit = ceil(sum(costs{1}>=costs{1}(end)+1e-2) * 1)
+%pit = maxit;
+pidxs = 1:20:pit+1;
+%pidxs = round(linspace(1, pit+1, 20));
 
 h = [];
 if plotsurf
