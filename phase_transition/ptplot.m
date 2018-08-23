@@ -1,9 +1,9 @@
-function ptplot(fname, pltcrit, lines, nticks, fitline)
+function ptplot(fname, lines, fitline, nticks, pltcrit)
 load(fname, 'p0s', 'thetas', 'obj', 'logt', 'logp');
 
-if nargin < 2 || isempty(pltcrit);  pltcrit = 0.9;      end
+if nargin < 3 || isempty(fitline);  fitline = false;    end
 if nargin < 4 || isempty(nticks);   nticks = [6 6];     end
-if nargin < 5 || isempty(fitline);  fitline = false;    end
+if nargin < 5 || isempty(pltcrit);  pltcrit = 0.9;      end
 
 if isscalar(pltcrit)
     pltcrit = @(obj) mean(obj >= pltcrit, 3);
@@ -37,7 +37,7 @@ tlabels = linspace(y(end),y(1),nticks(2));
 ax.YTick = ticks;
 ax.YTickLabels = tlabels;
 
-if nargin >= 3 && ~isempty(lines)
+if nargin >= 2 && ~isempty(lines)
   % If using a two-point system, convert to 2-affine system
   %   [x1 x1 y1 y2]  ==>  x + a*y + b = 0
   if size(lines,2) == 4
@@ -49,11 +49,8 @@ if nargin >= 3 && ~isempty(lines)
   % If FITLINE==TRUE, initialize with first line to fit the halfway line
   if fitline
     [X, Y] = meshgrid(x,y);
-    wsharp = 1e2;
     w0 = [1 lines(1,:)];
-    M_ = 1./(1+exp( -wsharp*(w0(1)*X+w0(2)*Y+w0(3) )));
-    wsign = sign(sum(sum((M_-0.5) .* (M-0.5))));
-    w = logisticfit([X(:) Y(:)], M(:), wsign*wsharp*w0);
+    w = logisticfit([X(:) Y(:)], M(:), 1e2*w0);
     lines(1,:) = w(2:3)/w(1);
   end
   
