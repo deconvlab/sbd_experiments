@@ -5,14 +5,9 @@ end
 
 methods
 function o = sbd_lasso(y, ainit, params, xparams)
-    o = o@sbd_template(y, ainit);
+    o = o@sbd_template(y, ainit, params);
     o.xsolver = set_y(o.xsolver, y);
-    
-    o.params.stepsz = [];
-    if nargin >= 3 && ~isempty(params)
-        o = set_params(o, params);
-    end
-    
+
     if nargin >= 4 && ~isempty(xparams)
         o.xsolver = set_params(o.xsolver, xparams);
     end
@@ -34,11 +29,11 @@ function o = step(o)
     [o.xsolver, o.cost] = evaluate(o.xsolver, o.a, o.params.lambda);
     o.x = o.xsolver.x;
     xhat = fft(o.x);
-    
+
     w = o.s.Exp(o.a, o.params.alph * o.s.Log(o.a_, o.a));
     g = real(ifft(conj(xhat) .* (xhat .* fft(w, numel(o.x)) - o.yhat)));
     g = g(1:numel(w));
-    
+
     if ~isempty(o.params.stepsz)
         t = o.params.stepsz;
     else
