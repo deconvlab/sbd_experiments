@@ -83,7 +83,7 @@ function results = ptloop(solverfun, params, results)
     
     % Create parfor containers
     obj_trials = results.obj(idx,:);
-    obj__trials = resutls.obj_(idx,:);
+    obj__trials = results.obj_(idx,:);
     its_trials = results.its(idx,:);
 
     if saveconvdata
