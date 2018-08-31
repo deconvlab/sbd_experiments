@@ -1,4 +1,4 @@
-classdef lasso_fista
+classdef lasso_fista < handle
 properties
     x;
     costs;
@@ -40,18 +40,18 @@ end
 
 function [o, cost] = evaluate(o, a, weights)
     m = numel(o.y);  a = a(:);
-    
+
     ahat = fft(a,m);
     a2hat = abs(ahat).^2;
     ayhat = conj(ahat).*o.yhat;
     s = 0.99/max(a2hat);
-    
+
     if isempty(o.x)
-        o.x = randn(m,1);  
+        o.x = randn(m,1);
     end
-    
+
     w = fft(o.x);  xhat_ = w;  t = 1;
-    o.it = 0;  repeat = true;  
+    o.it = 0;  repeat = true;
     o.costs = NaN(o.params.maxit,1); cost = Inf;
     while repeat
         o.x = soft(real(ifft(w - s*(a2hat.*w-ayhat))), s*weights);
@@ -61,15 +61,15 @@ function [o, cost] = evaluate(o, a, weights)
 
         t = t_;  xhat_ = xhat;
         o.it = o.it + 1;
-        
+
         o.costs(o.it) = norm(real(ifft(ahat.*xhat))-o.y)^2/2 ...
             + norm(weights .* o.x(:),1);
-        
+
         o.eps = abs(cost - o.costs(o.it));
         cost = o.costs(o.it);
         repeat = (o.it < o.params.maxit) && (o.eps >= o.params.tol);
     end
-    
+
     o.costs = o.costs(1:o.it);
 end
 end
