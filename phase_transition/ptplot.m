@@ -1,5 +1,4 @@
-function ptplot(fname, lines, fitline, nticks, pltcrit)
-load(fname, 'p0s', 'thetas', 'obj', 'logt', 'logp');
+function ptplot(results, lines, fitline, nticks, pltcrit)
 
 if nargin < 3 || isempty(fitline);  fitline = false;    end
 if nargin < 4 || isempty(nticks);   nticks = [6 6];     end
@@ -9,8 +8,12 @@ if isscalar(pltcrit)
     pltcrit = @(obj) mean(obj >= pltcrit, 3);
 end
 
-if exist('logt','var'); x=logt;  else x=log10(thetas); end
-if exist('logp','var'); y=logp;  else y=log10(p0s);    end
+vars = {'theta', 'p', 'obj', 'obj_'};
+for i = 1:numel(vars)
+  eval([vars{i} '= results.' vars{i} ';']);
+end
+if isfield(results, 'logt'); x=results.logt;  else; x=log10(theta); end
+if isfield(results, 'logp'); y=results.logp;  else; y=log10(p);    end
 
 clf;
 colormap gray;
@@ -45,7 +48,7 @@ if nargin >= 2 && ~isempty(lines)
     lines = -(xs(:,2)-xs(:,1))/(ys(:,2)-ys(:,1));
     lines = [lines -(xs(:,1)+lines.*ys(:,1))];
   end
-  
+
   % If FITLINE==TRUE, initialize with first line to fit the halfway line
   if fitline
     [X, Y] = meshgrid(x,y);
@@ -53,18 +56,18 @@ if nargin >= 2 && ~isempty(lines)
     w = logisticfit([X(:) Y(:)], M(:), 1e2*w0);
     lines(1,:) = w(2:3)/w(1);
   end
-  
+
   % Calculate line in p-theta space
   xs = (min(x) + max(x))/2;
   xs = ([min(x) max(x)] - xs)*2 + xs;
   ys = -(xs + repmat(lines(:,2), [1 2]))./repmat(lines(:,1), [1 2]);
-  
+
   % Convert line to grid space
   %   [x y]' = [x0 y0]' + [cu dv]'
   %   [c d]' = [dx dy]' ./ [du dv]'
   us = (xs - min(x))*(numel(x)-1)/range(x)+1;
   vs = -(ys - max(y))*(numel(y)-1)/range(y)+1;
-  
+
   hold on;
   plot(us, vs', '--', 'linewidth', 3);
   lgd = arrayfun(@(c) sprintf('$\\theta \\simeq p^{%.3f}$',c), ...
