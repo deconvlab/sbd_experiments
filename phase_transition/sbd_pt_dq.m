@@ -3,9 +3,9 @@ clear; %clc; %#ok<*PFBNS>
 run('../initpkg.m');
 
 %% Settings
-params.theta = 10.^linspace(-2.5, -1.5, 5);
-params.p = ceil(10.^linspace(3, 4, 5));
-params.trials = 5;
+params.theta = 10.^linspace(-2.5, -1.5, 15);
+params.p = ceil(10.^linspace(3, 4, 15));
+params.trials = 50;
 params.saveconvdata = false;
 
 m = @(p) 100*p;
