@@ -51,11 +51,11 @@ function [o, stats] = solve(o)
   % Refinement
   function [agrad, ygrad] = refine_LS_grad(y,x,p) %#ok<DEFNU>
     ysupp = logical(cconv(x~=0, ones(numel(o.a),1), numel(x)));
-    
+
     xhat = fft(x);
     ygrad = real(ifft(conj(xhat).*fft(ysupp.*y)));
     ygrad = ygrad(1:p);
-    
+
     function out = agradfun(a)
       out = real(ifft(xhat.*fft(a, numel(x))));
       out = real(ifft(conj(xhat).*fft(ysupp.*out)));
@@ -63,19 +63,19 @@ function [o, stats] = solve(o)
     end
     agrad = @agradfun;
   end
-  
+
   n_iters = size(o.params.refine_iters,1);
   if n_iters
     lambda = 1;
     xsolver = set_y(lasso_fista(), o.y);
     xsolver.x = o.x;
-    
+
     for i = 1:n_iters
       % Solve for x using lasso and get support
       xsolver = xsolver.set_params(struct('maxit', o.params.refine_iters(i,1)));
       xsolver = xsolver.evaluate(o.a, lambda);
       o.x = xsolver.x;
-      
+
       % Update a using least squares / gradient descent on xsupp
       if false
         [agrad, ygrad] = refine_LS_grad(o.y, o.x, numel(o.a)); %#ok<UNRCH>
@@ -90,7 +90,7 @@ function [o, stats] = solve(o)
           agrad = real(ifft(xhat.*fft(agrad, numel(xhat))))-o.y;
           agrad = real(ifft(conj(xhat).*fft(ysupp.*agrad)));
           agrad = agrad(1:numel(a_));
-          
+
           o.a = o.a - agrad/L;
         end
       end

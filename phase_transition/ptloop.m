@@ -19,7 +19,7 @@ function results = ptloop(solverfun, params, results)
 %       trial sample if true. Default is false.
 %
 %     backup (optional): String.  If nonempty, backs up a copy of the results
-%       at the end of each experiment to base workspace using the string as 
+%       at the end of each experiment to base workspace using the string as
 %       variable name. See RESULTS in the Returns section.
 %
 %     exp_init (optional): Int.  Experiment index to start from. Default is 1.
@@ -48,12 +48,12 @@ function results = ptloop(solverfun, params, results)
     'exp_init', 1; ...
     'n_workers', 0 ...
   };
-  
+
   for idx = 1:size(optional_params,1)
     if isfield(params, optional_params{idx,1})
       eval([optional_params{idx,1} '= params.' optional_params{idx,1} ';']);
     else
-      eval([optional_params{idx,1} '= optional_params{idx,2};']);    
+      eval([optional_params{idx,1} '= optional_params{idx,2};']);
     end
   end
 
@@ -77,11 +77,15 @@ function results = ptloop(solverfun, params, results)
 
   for idx = exp_init:n_exps
     fprintf('[%5d|%5d]:  ', idx-1, n_exps-1);
-    
+
     [i, j] = ind2sub([numel(theta) numel(p)], idx);
     thetai = theta(i); pj = p(j);
-    
-    % Create parfor containers
+
+    % Create parfor containers:
+    % In ptplot.m, the final objective (obj) will be compared to the
+    % objective in the last stats container produced by the solve method
+    % of the sbd solver (obj_). For DQ, obj_ and obj holds the value
+    % before and after refinement, resp. For lasso, obj_ = obj.
     obj_trials = results.obj(idx,:);
     obj__trials = results.obj_(idx,:);
     its_trials = results.its(idx,:);
@@ -91,7 +95,7 @@ function results = ptloop(solverfun, params, results)
       x0_trials = results.x0(idx,:);
       a_trials = results.a(idx,:);
     end
-    
+
     % WHAT HAPPENS IN EACH TRIAL:
     t0 = tic;
     %for trial = 1:trials
@@ -122,7 +126,7 @@ function results = ptloop(solverfun, params, results)
     end
     results.exp_idx = idx;
     results.times(idx) = toc(t0);
-    
+
     % Write back to results
     results.obj(idx,:) = obj_trials;
     results.obj_(idx,:) = obj__trials;

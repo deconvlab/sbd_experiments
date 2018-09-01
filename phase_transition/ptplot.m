@@ -1,11 +1,14 @@
-function ptplot(results, lines, fitline, nticks, pltcrit)
+function ptplot(results, pltcrit, lines, fitline, nticks)
 
-if nargin < 3 || isempty(fitline);  fitline = false;    end
-if nargin < 4 || isempty(nticks);   nticks = [6 6];     end
-if nargin < 5 || isempty(pltcrit);  pltcrit = 0.9;      end
+if nargin < 2 || isempty(pltcrit);  pltcrit = [0.99 0.1]; end
+if nargin < 3 || isempty(lines);    lines = [];           end
+if nargin < 4 || isempty(fitline);  fitline = false;      end
+if nargin < 5 || isempty(nticks);   nticks = [6 6];       end
 
-if isscalar(pltcrit)
-    pltcrit = @(obj) mean(obj >= pltcrit, 3);
+if isnumeric(pltcrit)
+  pltcrit = @(obj, obj_) mean( ...
+    (obj >= pltcrit(1)) & (abs(obj_-obj) < pltcrit(2)), 3 ...
+  );
 end
 
 vars = {'theta', 'p', 'obj', 'obj_'};
@@ -17,7 +20,7 @@ if isfield(results, 'logp'); y=results.logp;  else; y=log10(p);    end
 
 clf;
 colormap gray;
-M = pltcrit(obj);
+M = pltcrit(obj, obj_);
 imagesc(flipud(M'));
 axis equal;
 xlim([0.5 size(obj,1)+0.5]);
@@ -40,7 +43,7 @@ tlabels = linspace(y(end),y(1),nticks(2));
 ax.YTick = ticks;
 ax.YTickLabels = tlabels;
 
-if nargin >= 2 && ~isempty(lines)
+if ~isempty(lines)
   % If using a two-point system, convert to 2-affine system
   %   [x1 x1 y1 y2]  ==>  x + a*y + b = 0
   if size(lines,2) == 4
