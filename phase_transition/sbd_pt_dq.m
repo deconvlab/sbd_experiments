@@ -16,7 +16,7 @@ params.backup = 'results_backup';
 params.n_workers = Inf;
 
 lamfac = 0.8;
-solparams = @(theta, p) struct('iter_lim', [1 1e3], 'iter_tol', 1e-5, ...
+solparams = @(theta, p) struct('iter_lim', [1 1e3], 'iter_tol', 1e-3, ...
   'solve_lambdas', lamfac *[1/sqrt(p*theta) 1]);
 solverfun = @(y, a_init, theta, p) sbd_dq(y, a_init, solparams(theta, p));
 
