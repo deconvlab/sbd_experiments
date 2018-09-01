@@ -24,6 +24,6 @@ solverfun = @(y, a_init, theta, p) sbd_dq(y, a_init, solparams(theta, p));
 warning('OFF', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 results = ptloop(solverfun, params);
 warning('ON', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
-save('./sbd_pt_dq/tmp.mat', 'results');
+save('./sbd_pt_dq/tmp1.mat', 'results');
 %plotscript;
 beep
