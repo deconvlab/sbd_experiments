@@ -11,7 +11,7 @@ params.saveconvdata = false;
 m = @(p) 100*p;
 params.xdist = @(theta, p) (rand(m(p),1) <= theta) .* randn(m(p),1);
 
-params.saveconvdata = true;
+params.saveconvdata = false;
 params.backup = 'results_backup';
 params.n_workers = Inf;
 
