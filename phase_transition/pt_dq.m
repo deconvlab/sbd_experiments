@@ -4,11 +4,10 @@ run('../initpkg.m');
 
 %% Settings
 params.vars = { ...
-  'log_t' linspace(-2.5, -2.0, 5); ...
+  'log_t'     linspace(-2.5, -2.0, 5); ...
   'log_p'     linspace(3.2, 4.2, 5) ...
 };
 params.trials = 5;
-params.saveconvdata = false;
 
 params.saveconvdata = false;
 params.backup = 'results_backup';
@@ -29,7 +28,7 @@ results = loop2var(solverfun, params);
 warning('ON', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 
 results.vars{1,1} = '\log_{10}(\theta)';
-results.vars{1,2} = '\log_{10}(p)';
+results.vars{2,1} = '\log_{10}(p)';
 save('./sbd_pt_dq/tmp1.mat', 'results');
 
 %plotscript;

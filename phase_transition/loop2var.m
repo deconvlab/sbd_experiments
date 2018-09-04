@@ -40,7 +40,9 @@ function results = loop2var(solverfun, params, results)
   % Pass parameters:
   var1 = params.vars{1,2};
   var2 = params.vars{2,2};
-  n_exps = numel(var1) * numel(var2);
+  nv1 = numel(var1);
+  nv2 = numel(var2);
+  n_exps = nv1 * nv2;
   trials = params.trials;
   xdist = params.xdist;
   adist = params.adist;
@@ -64,7 +66,7 @@ function results = loop2var(solverfun, params, results)
 
   if nargin < 3 || ~isstruct(results)
     results.n_exps = n_exps;
-    results.vars = vars;
+    results.vars = params.vars;
     results.trials = trials;
 
     results.obj = NaN(n_exps, trials);
@@ -80,9 +82,9 @@ function results = loop2var(solverfun, params, results)
   end
 
   for idx = exp_init:n_exps
-    fprintf('[%5d|%5d]:  ', idx-1, n_exps-1);
+    fprintf('[%3d|%3d]: ', idx-1, n_exps-1);
 
-    [i, j] = ind2sub([numel(theta) numel(p)], idx);
+    [i, j] = ind2sub([nv1 nv2], idx);
     v1i = var1(i); v2j = var2(j);
 
     % Create parfor containers:
@@ -145,18 +147,18 @@ function results = loop2var(solverfun, params, results)
     end
 
     % Print & back up results
-    fprintf('%s = %.2E, %s = %.2E, mean obj. = %.2f.', ...
-      params.vars{2}, v2j, params.vars{1}, v1i, mean(results.obj(idx,:)));
-    fprintf(' Time elapsed: %.1fs.\n', results.times(idx));
-    if i == numel(theta);  disp(' ');  end
+    fprintf('%s = %.1E, %s = %.1E, mean obj. = %.2f.', ...
+      params.vars{2,1}, v2j, params.vars{1,1}, v1i, mean(results.obj(idx,:)));
+    fprintf(' Time: %.1fs.\n', results.times(idx));
+    if i == nv1;  disp(' ');  end
 
     if numel(backup);  assignin('base', backup, results);  end
   end
 
   % Final adjustments to results.
-  results.obj = reshape(results.obj, [numel(theta) numel(p) trials]);
-  results.obj_ = reshape(results.obj_, [numel(theta) numel(p) trials]);
-  results.its = reshape(results.its, [numel(theta) numel(p) trials]);
+  results.obj = reshape(results.obj, [nv1 nv2 trials]);
+  results.obj_ = reshape(results.obj_, [nv1 nv2 trials]);
+  results.its = reshape(results.its, [nv1 nv2 trials]);
   disp('Done.');
 end
 

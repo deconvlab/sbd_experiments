@@ -3,12 +3,12 @@ clear; %clc; %#ok<*PFBNS>
 run('../initpkg.m');
 
 %% Settings
-params.trials = 10;
+params.trials = 5;
 params.saveconvdata = false;
 params.backup = 'results_backup';
 params.n_workers = 0; %Inf;
 
-log_p = 3.5;
+log_p = 3;
 p = round(10^log_p);
 m = p * 100;
 
