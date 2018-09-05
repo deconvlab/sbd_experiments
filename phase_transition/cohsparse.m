@@ -8,13 +8,13 @@ params.saveconvdata = false;
 params.backup = 'results_backup';
 params.n_workers = 0; %Inf;
 
-log_p = log10(5000);
+log_p = 3.7;
 p = round(10^log_p);
 m = p * 100;
 
 params.vars = { ...
-  'log_t'     linspace(-2.5, -1, 10); ...
-  'log_pmu'   linspace(log_p-1, log_p, 10) ...
+  'log_t'     linspace(-3, -2, 10); ...
+  'log_pmu'   linspace(log_p-2, log_p, 10) ...
 };
 
 params.xdist = @(log_t, ~) (rand(m,1) <= 10^log_t) .* randn(m,1);
