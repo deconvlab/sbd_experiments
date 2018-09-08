@@ -3,7 +3,7 @@ clear; %clc; %#ok<*PFBNS>
 run('../initpkg.m');
 
 %% Settings
-params.trials = 5;
+params.trials = 20;
 params.saveconvdata = false;
 params.backup = 'results_backup';
 params.n_workers = 0; %Inf;
@@ -32,7 +32,7 @@ warning('ON', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 
 %% Save results
 results.vars{1,1} = '\log_{10}(\theta)';
-results.vars{2,1} = '\log_{10}(p_\mu)';
+results.vars{2,1} = '\log_{10}(p'')';
 save('./cohsparse/tmp.mat', 'results');
 
 %plotscript;
