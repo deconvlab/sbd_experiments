@@ -118,7 +118,7 @@ function results = loop2var(solverfun, params, results)
       y = cconv(a0, x0, numel(x0));
 
       % B) Create solver and run continuation sequence
-      solver = solverfun(y, a0, v1i, v2j); %#ok<PFBNS>
+      solver = solverfun(y, numel(a0), v1i, v2j); %#ok<PFBNS>
       [solver, stats] = solver.solve();
 
       % C) Record statistics

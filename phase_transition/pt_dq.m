@@ -27,8 +27,8 @@ warning('OFF', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 results = loop2var(solverfun, params);
 warning('ON', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
 
-results.vars{1,1} = '\log_{10}(\theta)';
-results.vars{2,1} = '\log_{10}(p)';
+results.vars{1,1} = '\mathrm{Sparsity\ rate\ } \log_{10}(\theta)';
+results.vars{2,1} = '\mathrm{Signal\ length\ } \log_{10}(p_0)';
 save('./sbd_pt_dq/tmp1.mat', 'results');
 
 %plotscript;

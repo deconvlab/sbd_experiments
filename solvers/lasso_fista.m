@@ -2,7 +2,7 @@ classdef lasso_fista < handle
 properties
     x;
     costs;
-    params = struct('maxit', 1e4, 'tol', 1e-4);
+    params = struct('maxit', 1e4, 'tol', 1e-4, 'xpos', false);
 
     it;
     eps;
@@ -55,6 +55,8 @@ function [o, cost] = evaluate(o, a, weights)
     o.costs = NaN(o.params.maxit,1); cost = Inf;
     while repeat
         o.x = soft(real(ifft(w - s*(a2hat.*w-ayhat))), s*weights);
+        if o.params.xpos;  o.x = max(o.x, 0);  end
+        
         t_ = (1+sqrt(1 + 4*t^2))/2;
         xhat = fft(o.x);
         w = xhat + (t-1)/t_ * (xhat - xhat_);
