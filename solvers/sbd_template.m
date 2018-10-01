@@ -44,8 +44,6 @@ function o = set_y(o, y)
 end
 
 function o = reset(o, ainit)
-  m = numel(o.y);
-
   if nargin < 2 || isempty(ainit)
     ainit = o.p0;
   end
@@ -53,21 +51,29 @@ function o = reset(o, ainit)
   if numel(ainit) > 1
     o.a0 = ainit;
     o.p0 = numel(ainit);
+    o.a0 = o.a0(:)/norm(o.a0(:));
   elseif o.params.data_init
-    o.p0 = ainit;
-    o.a0 = o.y(mod(randi(m) + (1:ainit), m) + 1);
-    o.a0 = [zeros(ainit-1,1); o.a0(:); zeros(ainit-1,1)];
+    o = data_init(o, ainit);
   else
     o.p0 = ainit;
     o.a0 = randn(ainit,1);
+    o.a0 = o.a0(:)/norm(o.a0(:));
   end
-  o.a0 = o.a0(:)/norm(o.a0(:));
 
   o.a = o.a0;  o.a_ = o.a0;
   o.x = [];
 
   o.it = 0;
   o.cost = [];
+end
+
+function o = data_init(o, p0)
+  m = numel(o.y);
+  o.p0 = p0;
+  
+  o.a0 = o.y(mod(randi(m) + (1:p0), m) + 1);
+  o.a0 = [zeros(p0-1,1); o.a0(:); zeros(p0-1,1)];
+  o.a0 = o.a0(:)/norm(o.a0(:));
 end
 
 function o = step(o)
