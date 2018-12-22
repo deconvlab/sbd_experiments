@@ -11,11 +11,17 @@ function results = loop2var(solverfun, params, results)
 %     vars: 2x2 cell array.  Each row contains the {VARNAME, VARARRAY}
 %       elements, where VARNAME is a string and VARARRAY is a 1d real array.
 %
-%     xdist: Function handle.  For the distribution of x, as follows:
-%       X = XDIST(VAR1, VAR2).
+%     gen: Struct.  For generating data, with the following fields
+%       x0: Function handle.  For generating x0, as follows:
+%         X0 = gen.x0(VAR1, VAR2).
 %
-%     adist: Function handle.  For the distribution of a, as follows:
-%       A = ADIST(VAR1, VAR2). The resulting kernel is then normalized.
+%       a0: Function handle.  For generating a0, as follows:
+%         A0 = gen.a0(VAR1, VAR2).
+%         The resulting kernel is then normalized.
+%
+%       a_init: Function handle.  For generating a0, as follows:
+%         A_INIT = gen.a_init(VAR1, VAR2).
+%         The resulting kernel is then normalized.
 %
 %     trials: Int.  The number of trials to solve for each theta-p
 %
@@ -44,8 +50,7 @@ function results = loop2var(solverfun, params, results)
   nv2 = numel(var2);
   n_exps = nv1 * nv2;
   trials = params.trials;
-  xdist = params.xdist;
-  adist = params.adist;
+  gen = params.gen;
 
   saveconvdata = isfield(params, 'saveconvdata') && params.saveconvdata;
 
@@ -77,6 +82,7 @@ function results = loop2var(solverfun, params, results)
     if saveconvdata
       results.a0 = cell(n_exps, trials);
       %results.x0 = cell(n_exps, trials);
+      results.ainit = cell(n_exps, trials);
       results.a = cell(n_exps, trials);
     end
   end
@@ -96,9 +102,11 @@ function results = loop2var(solverfun, params, results)
     obj__trials = results.obj_(idx,:);
     its_trials = results.its(idx,:);
 
+    % Initialize containers for saving variables
     if saveconvdata
       a0_trials = results.a0(idx,:);
       %x0_trials = results.x0(idx,:);
+      ainit_trials = results.ainit(idx,:);
       a_trials = results.a(idx,:);
     end
 
@@ -107,18 +115,21 @@ function results = loop2var(solverfun, params, results)
     for trial = 1:trials
     %parfor (trial = 1:trials, n_workers)
       % A) Generate data: supp(x) must be >= 1
-      a0 = adist(v1i, v2j);  %#ok<PFBNS>
+      a0 = gen.a0(v1i, v2j);  %#ok<PFBNS>
       a0 = a0/norm(a0);
 
       xgood = false;
       while ~xgood
-        x0 = xdist(v1i, v2j); %#ok<PFBNS>
+        x0 = gen.x0(v1i, v2j); %#ok<PFBNS>
         xgood = sum(x0~=0) >= 1;
       end
       y = cconv(a0, x0, numel(x0));
 
       % B) Create solver and run continuation sequence
-      solver = solverfun(y, numel(a0), v1i, v2j); %#ok<PFBNS>
+      ainit = gen.ainit(v1i, v2j);
+      ainit = ainit/norm(ainit);
+
+      solver = solverfun(y, ainit, v1i, v2j); %#ok<PFBNS>
       [solver, stats] = solver.solve();
 
       % C) Record statistics
@@ -129,6 +140,7 @@ function results = loop2var(solverfun, params, results)
       if saveconvdata
         a0_trials{trial} = a0;
         %x0_trials{trial} = sparse(x0);
+        ainit_trials{trial} = ainit;
         a_trials{trial} = solver.a;
       end
     end
@@ -143,6 +155,7 @@ function results = loop2var(solverfun, params, results)
     if saveconvdata
       results.a0(idx,:) = a0_trials;
       %results.x0(idx,:) = x0_trials;
+      results.ainit(idx,:) = ainit_trials;
       results.a(idx,:) = a_trials;
     end
 
@@ -163,6 +176,7 @@ function results = loop2var(solverfun, params, results)
   if saveconvdata
       results.a0 = reshape(results.a0, [nv1 nv2 trials]);
       %results.x0 = reshape(results.x0, [nv1 nv2 trials]);
+      results.ainit = reshape(results.ainit, [nv1 nv2 trials]);
       results.a = reshape(results.a, [nv1 nv2 trials]);
     end
 

@@ -18,20 +18,20 @@ params.saveconvdata = true;        % whether or not to save variables
 params.backup = 'results_backup';   % variable to update as the trials go
 params.n_workers = Inf;
 
-% How to pick m, x and a
+% How to pick x0, a0, and a_init
 m = @(log_p) 100*round(10^log_p);
-params.xdist = @(log_t, log_p) (rand(m(log_p),1) <= 10^log_t) .* randn(m(log_p),1);
-params.adist = @(~, log_p) randn(round(10^log_p), 1);
+params.gen.x0 = @(log_t, log_p) (rand(m(log_p),1) <= 10^log_t) .* randn(m(log_p),1);
+params.gen.a0 = @(~, log_p) randn(round(10^log_p), 1);
+params.gen.ainit = @(~,log_p) randn(round(10^log_p), 1);
 
 % Solver parameters for differing theta and p
+% e.g. for 5 refinement steps; 10 fista and 20 agd iterations each
+%   refine_iters = ones(5,1)*[10 20];
 solparams = @(theta, p) struct( ...
   'iter_lim', [1 1e3], ...      % min / max iterations
   'iter_tol', 1e-3, ...         % tolerence until exiting iterations
   'solve_lambdas', 0.2*[1/sqrt(p*theta) 1], ...   % sequence of lambdas
-
   'refine_iters', [] ...        % xsolve and agd iterations
-  %  e.g. for 5 refinement steps; 10 fista and 20 agd iterations each
-  %   refine_iters = ones(5,1)*[10 20];
 );
 
 % How the solver gets initialized as parameters change
