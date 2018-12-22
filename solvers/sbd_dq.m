@@ -31,7 +31,7 @@ function [g, x] = calc_grad(o, a)
   x = real(ifft(o.yhat .* conj(fft(a, numel(o.y)))));
   x = soft(x, o.params.lambda);
   xhat = fft(x);
-  
+
   g = -real(ifft(conj(xhat) .* o.yhat));
   g = g(1:numel(a));
 end
@@ -39,15 +39,17 @@ end
 function o = data_init(o, p0)
   m = numel(o.y);
   o.p0 = p0;
-  
+
   o.a0 = o.y(mod(randi(m) + (1:p0), m) + 1);
   o.a0 = [zeros(p0-1,1); o.a0(:); zeros(p0-1,1)];
-  
+
   o.a0 = -o.calc_grad(o.a0/norm(o.a0(:)));
   o.a0 = o.a0(:)/norm(o.a0(:));
 end
 
 function o = step(o)
+  % There is no backtracking yet!
+
   if o.params.alph > 0
       w = o.s.Exp(o.a, o.params.alph * o.s.Log(o.a_, o.a));
   else
@@ -62,53 +64,35 @@ function o = step(o)
 end
 
 function [o, stats] = solve(o)
+  % Iterate for all lambdas
   [o, stats] = solve@sbd_template(o);
 
   % Refinement
-  function [agrad, ygrad] = refine_LS_grad(y,x,p) %#ok<DEFNU>
-    ysupp = logical(cconv(x~=0, ones(numel(o.a),1), numel(x)));
-
-    xhat = fft(x);
-    ygrad = real(ifft(conj(xhat).*fft(ysupp.*y)));
-    ygrad = ygrad(1:p);
-
-    function out = agradfun(a)
-      out = real(ifft(xhat.*fft(a, numel(x))));
-      out = real(ifft(conj(xhat).*fft(ysupp.*out)));
-      out = out(1:numel(a));
-    end
-    agrad = @agradfun;
-  end
-
-  n_iters = size(o.params.refine_iters,1);
-  if n_iters
+  n_refine = size(o.params.refine_iters,1);
+  if n_refine
     lambda = 1;
     xsolver = set_y(lasso_fista(), o.y);
     xsolver.x = o.x;
 
-    for i = 1:n_iters
+    for i = 1:n_refine
       % Solve for x using lasso and get support
       xsolver = xsolver.set_params(struct('maxit', o.params.refine_iters(i,1)));
       xsolver = xsolver.evaluate(o.a, lambda);
       o.x = xsolver.x;
 
-      % Update a using least squares / gradient descent on xsupp
-      if false
-        [agrad, ygrad] = refine_LS_grad(o.y, o.x, numel(o.a)); %#ok<UNRCH>
-        o.a = pcg(agrad, ygrad);
-      else
-        a_ = o.a;
-        ysupp = logical(cconv(o.x~=0, ones(numel(a_),1), numel(o.x)));
-        xhat = fft(xsolver.x);
-        L = max(abs(xhat))^2;
-        for j = 1:o.params.refine_iters(i,2)
-          agrad = o.a + 0.9 * (o.a - a_);
-          agrad = real(ifft(xhat.*fft(agrad, numel(xhat))))-o.y;
-          agrad = real(ifft(conj(xhat).*fft(ysupp.*agrad)));
-          agrad = agrad(1:numel(a_));
+      % Update a using gradient descent on xsupp
+      a_ = o.a;
+      ysupp = logical(cconv(o.x~=0, ones(numel(a_),1), numel(o.x)));
+      xhat = fft(xsolver.x);
+      L = max(abs(xhat))^2;
+      for j = 1:o.params.refine_iters(i,2)
+        agrad = o.a + 0.9 * (o.a - a_);
+        agrad = real(ifft(xhat.*fft(agrad, numel(xhat))))-o.y;
+        agrad = real(ifft(conj(xhat).*fft(ysupp.*agrad)));
+        agrad = agrad(1:numel(a_));
 
-          o.a = o.a - agrad/L;
-        end
+        a_ = o.a;
+        o.a = o.a - agrad/L;
       end
       o.a = o.a/norm(o.a);
 

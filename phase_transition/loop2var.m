@@ -76,7 +76,7 @@ function results = loop2var(solverfun, params, results)
 
     if saveconvdata
       results.a0 = cell(n_exps, trials);
-      results.x0 = cell(n_exps, trials);
+      %results.x0 = cell(n_exps, trials);
       results.a = cell(n_exps, trials);
     end
   end
@@ -98,18 +98,18 @@ function results = loop2var(solverfun, params, results)
 
     if saveconvdata
       a0_trials = results.a0(idx,:);
-      x0_trials = results.x0(idx,:);
+      %x0_trials = results.x0(idx,:);
       a_trials = results.a(idx,:);
     end
 
     % WHAT HAPPENS IN EACH TRIAL:
     t0 = tic;
-    %for trial = 1:trials
-    parfor (trial = 1:trials, n_workers)
+    for trial = 1:trials
+    %parfor (trial = 1:trials, n_workers)
       % A) Generate data: supp(x) must be >= 1
       a0 = adist(v1i, v2j);  %#ok<PFBNS>
-      a0 = a0/norm(a0); 
-      
+      a0 = a0/norm(a0);
+
       xgood = false;
       while ~xgood
         x0 = xdist(v1i, v2j); %#ok<PFBNS>
@@ -128,7 +128,7 @@ function results = loop2var(solverfun, params, results)
 
       if saveconvdata
         a0_trials{trial} = a0;
-        x0_trials{trial} = sparse(x0);
+        %x0_trials{trial} = sparse(x0);
         a_trials{trial} = solver.a;
       end
     end
@@ -142,7 +142,7 @@ function results = loop2var(solverfun, params, results)
 
     if saveconvdata
       results.a0(idx,:) = a0_trials;
-      results.x0(idx,:) = x0_trials;
+      %results.x0(idx,:) = x0_trials;
       results.a(idx,:) = a_trials;
     end
 
@@ -153,12 +153,19 @@ function results = loop2var(solverfun, params, results)
     if i == nv1;  disp(' ');  end
 
     if numel(backup);  assignin('base', backup, results);  end
-  end
+  end   % end-of-loop
 
   % Final adjustments to results.
   results.obj = reshape(results.obj, [nv1 nv2 trials]);
   results.obj_ = reshape(results.obj_, [nv1 nv2 trials]);
   results.its = reshape(results.its, [nv1 nv2 trials]);
+
+  if saveconvdata
+      results.a0 = reshape(results.a0, [nv1 nv2 trials]);
+      %results.x0 = reshape(results.x0, [nv1 nv2 trials]);
+      results.a = reshape(results.a, [nv1 nv2 trials]);
+    end
+
   disp('Done.');
 end
 
