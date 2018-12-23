@@ -1,6 +1,6 @@
 classdef sbd_template < matlab.mixin.SetGet
 properties
-  a;  x;
+  a;  x;  y;
   params;
 
   cost;
@@ -9,7 +9,7 @@ end
 
 properties (Access = protected)
   p0;
-  y;  yhat;
+  yhat;
   ainit;  a_;
   s = obops;
 end
@@ -39,7 +39,6 @@ function o = set_params(o, params)
 end
 
 function o = set_y(o, y)
-  o.y = y;
   o.yhat = fft(y);
 end
 
