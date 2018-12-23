@@ -137,8 +137,5 @@ function [o, stats] = solve(o)
   stats = cell2mat(stats);
 end
 
-function [o, stats] = test_bg(o, m, p, theta, lambda)
-end
-
 end
 end
