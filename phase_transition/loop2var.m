@@ -19,8 +19,8 @@ function results = loop2var(solverfun, params, results)
 %         A0 = gen.a0(VAR1, VAR2).
 %         The resulting kernel is then normalized.
 %
-%       a_init: Function handle.  For generating a0, as follows:
-%         A_INIT = gen.a_init(VAR1, VAR2).
+%       ainit: Function handle.  For generating ainit, as follows:
+%         AINIT = gen.a_init(VAR1, VAR2, Y, A0, X0).
 %         The resulting kernel is then normalized.
 %
 %     trials: Int.  The number of trials to solve for each theta-p
@@ -126,10 +126,12 @@ function results = loop2var(solverfun, params, results)
       y = cconv(a0, x0, numel(x0));
 
       % B) Create solver and run continuation sequence
-      ainit = gen.ainit(v1i, v2j);
-      ainit = ainit/norm(ainit);
+      solver = solverfun(y, v1i, v2j); %#ok<PFBNS>
 
-      solver = solverfun(y, ainit, v1i, v2j); %#ok<PFBNS>
+      ainit = gen.ainit(v1i, v2j, solver, a0, x0);
+      ainit = ainit/norm(ainit);
+      solver.set_ainit(ainit);
+
       [solver, stats] = solver.solve();
 
       % C) Record statistics

@@ -4,13 +4,13 @@ properties
 end
 
 methods
-function o = sbd_lasso(y, ainit, params, xparams)
-  if nargin < 3 || isempty(params);  params = [];  end
+function o = sbd_lasso(y, params, xparams)
+  if nargin < 2 || isempty(params);  params = [];  end
 
-  o = o@sbd_template(y, ainit, params);
+  o = o@sbd_template(y, params);
   o.xsolver = set_y(o.xsolver, y);
 
-  if nargin >= 4 && ~isempty(xparams)
+  if nargin >= 3 && ~isempty(xparams)
       o.xsolver = set_params(o.xsolver, xparams);
   end
 end
@@ -20,9 +20,8 @@ function o = set_y(o, y)
     o.xsolver = set_y(o.xsolver, y);
 end
 
-function o = reset(o, ainit)
-    if nargin < 2;  ainit = [];  end
-    o = reset@sbd_template(o, ainit);
+function o = reset(o)
+    o = reset@sbd_template(o);
     o.xsolver = reset(o.xsolver);
 end
 
@@ -33,13 +32,17 @@ function o = step(o)
     xhat = fft(o.x);
 
     w = o.s.Exp(o.a, o.params.alph * o.s.Log(o.a_, o.a));
-    g = real(ifft(conj(xhat) .* (xhat .* fft(w, numel(o.x)) - o.yhat)));
-    g = g(1:numel(w));
+    g =
 
     t = 0.99/max(abs(xhat))^2;
     o.a_ = o.a;
     o.a = o.s.Exp(w, -t*o.s.e2rgrad(w, g));
     o.it = o.it + 1;
+end
+
+function g = calc_grad(o, a)
+  g = real(ifft(conj(xhat) .* (xhat .* fft(a, numel(o.x)) - o.yhat)));
+  g = g(1:numel(w));
 end
 
 end

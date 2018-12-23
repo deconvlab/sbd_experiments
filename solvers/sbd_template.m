@@ -10,22 +10,22 @@ end
 properties (Access = protected)
   p0;
   y;  yhat;
-  a0;  a_;
+  ainit;  a_;
   s = obops;
 end
 
 methods
-function o = sbd_template(y, ainit, params)
+function o = sbd_template(y, params)
   o = o.default_params();
   if nargin >= 3 && ~isempty(params)
     o = set_params(o, params);
   end
-  o = reset(set_y(o, y), ainit);
+  o = reset(set_y(o, y));
 end
 
 function o = default_params(o)
   o.params = struct( ...
-    'lambda', 0.1,  'alph', 0.9,  'data_init', true, ...
+    'lambda', 0.1,  'alph', 0.9, ...
     'iter_ilim', [1 1e3],  'iter_tol', 1e-3, ...
     'solve_lambdas', [],  'solve_center', false ...
   );
@@ -43,40 +43,45 @@ function o = set_y(o, y)
   o.yhat = fft(y);
 end
 
-function o = reset(o, ainit)
+function o = reset(o)
+  o.a = o.ainit;  o.a_ = o.ainit;
+  o.x = [];
+  o.it = 0;
+  o.cost = [];
+end
+
+function o = set_ainit(o, ainit)
   if nargin < 2 || isempty(ainit)
     ainit = o.p0;
   end
 
   if numel(ainit) > 1
-    o.a0 = ainit;
+    o.ainit = ainit;
     o.p0 = numel(ainit);
-    o.a0 = o.a0(:)/norm(o.a0(:));
-  elseif o.params.data_init
-    o = data_init(o, ainit);
+    o.ainit = o.ainit(:)/norm(o.ainit(:));
   else
-    o.p0 = ainit;
-    o.a0 = randn(ainit,1);
-    o.a0 = o.a0(:)/norm(o.a0(:));
+    o.ainit = data_init(o, ainit);
   end
 
-  o.a = o.a0;  o.a_ = o.a0;
-  o.x = [];
-
-  o.it = 0;
-  o.cost = [];
+  o.a = o.ainit;  o.a_ = o.ainit;
 end
 
-function o = data_init(o, p0)
+function ainit = data_init(o, p0, calc_grad)
+  if nargin < 3;  calc_grad = false;  end
   m = numel(o.y);
-  o.p0 = p0;
-  
-  o.a0 = o.y(mod(randi(m) + (1:p0), m) + 1);
-  o.a0 = [zeros(p0-1,1); o.a0(:); zeros(p0-1,1)];
-  o.a0 = o.a0(:)/norm(o.a0(:));
+
+  ainit = o.y(mod(randi(m) + (1:p0), m) + 1);
+  ainit = [zeros(p0-1,1); ainit(:); zeros(p0-1,1)];
+  if calc_grad
+    ainit = -o.calc_grad(ainit/norm(ainit(:)));
+  end
+  ainit = ainit(:)/norm(ainit(:));
 end
 
 function o = step(o)
+end
+
+function g = calc_grad(o, a) %#ok<INUSD,STOUT>
 end
 
 function [o, stats] = iterate(o)
@@ -131,6 +136,9 @@ function [o, stats] = solve(o)
   end
   o.params.lambda = o_lam;
   stats = cell2mat(stats);
+end
+
+function [o, stats] = test_bg(o, m, p, theta, lambda)
 end
 
 end

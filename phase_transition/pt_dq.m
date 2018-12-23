@@ -22,7 +22,9 @@ params.n_workers = Inf;
 m = @(log_p) 100*round(10^log_p);
 params.gen.x0 = @(log_t, log_p) (rand(m(log_p),1) <= 10^log_t) .* randn(m(log_p),1);
 params.gen.a0 = @(~, log_p) randn(round(10^log_p), 1);
-params.gen.ainit = @(~,log_p) randn(round(10^log_p), 1);
+params.gen.ainit = @(~, log_p, solver, a0, x0) ...
+  some_init(solver, round(10^log_p), a0, x0) ...
+);
 
 % Solver parameters for differing theta and p
 % e.g. for 5 refinement steps; 10 fista and 20 agd iterations each
@@ -35,8 +37,7 @@ solparams = @(theta, p) struct( ...
 );
 
 % How the solver gets initialized as parameters change
-solverfun = @(y, a_init, log_t, log_p) ...
-  sbd_dq(y, a_init, solparams(10^log_t, round(10^log_p)));
+solverfun = @(y, log_t, log_p) sbd_dq(y, solparams(10^log_t, round(10^log_p)));
 
 %% Run experiment
 warning('OFF', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
