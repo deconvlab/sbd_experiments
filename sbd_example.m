@@ -4,10 +4,10 @@ run('initpkg.m');
 
 %% Generate some synthetic data.
 % Params
-p = 500;               % Size of the (short) kernel
-m = 1e2*p;                      % Observation size
-theta = 10^-3.5;                % Bernoulli (sparsity) coefficient
-dist = @(m,n) randn(m,n);       % Distribution of activations
+p = 1000;                     % Size of the (short) kernel
+m = 1e2*p;                    % Observation size
+theta = 10^-3;                % Bernoulli (sparsity) coefficient
+dist = @(m,n) randn(m,n);     % Distribution of activations
 
 a0 = randn(p,1);
 %a0 = normpdf(1:p, (p+1)/2, p/10)';
@@ -28,7 +28,9 @@ params = struct(...
 
 params = struct('alph', 0, 'refine_iters', []);
 
-solver = sbd_dq(y, params);
+solver = sbd_lasso(params);
+solver = sbd_dq(params);
+solver.y = y;
 solver.set_ainit(solver.data_init(p,1));
 
 %profile on;

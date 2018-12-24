@@ -1,6 +1,6 @@
 classdef lasso_fista < handle
 properties
-    x;
+    x;  y;
     costs;
     params = struct('maxit', 1e4, 'tol', 1e-4, 'xpos', false);
 
@@ -8,15 +8,10 @@ properties
     eps;
 end
 
-properties (Access = protected)
-    y;  yhat;
-end
-
 methods
 function o = lasso_fista(params)
-    if nargin >= 1
-        o = set_params(o, params);
-    end
+  if nargin < 1;  params = struct();  end  
+  o = set_params(o, params);
 end
 
 function o = reset(o)
@@ -26,11 +21,6 @@ function o = reset(o)
     o.eps = [];
 end
 
-function o = set_y(o, y)
-    o.y = y;
-    o.yhat = fft(y);
-end
-
 function o = set_params(o, params)
     tmp = intersect(fieldnames(o.params), fieldnames(params));
     for i = 1:numel(tmp)
@@ -38,12 +28,12 @@ function o = set_params(o, params)
     end
 end
 
-function [o, cost] = evaluate(o, a, weights)
+function cost = evaluate(o, a, weights)
     m = numel(o.y);  a = a(:);
 
     ahat = fft(a,m);
     a2hat = abs(ahat).^2;
-    ayhat = conj(ahat).*o.yhat;
+    ayhat = conj(ahat).*fft(o.y);
     s = 0.99/max(a2hat);
 
     if isempty(o.x)

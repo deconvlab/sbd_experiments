@@ -9,18 +9,18 @@ end
 
 properties (Access = protected)
   p0;
+  yvars = false;  
   yhat;
   ainit;  a_;
   s = obops;
 end
 
 methods
-function o = sbd_template(y, params)
+function o = sbd_template(params)
+  if nargin < 1;  params = struct();  end
   o = o.default_params();
-  if nargin >= 2 && ~isempty(params)
-    o = set_params(o, params);
-  end
-  o = reset(set_y(o, y));
+  o.set_params(params);
+  o.reset();
 end
 
 function o = default_params(o)
@@ -36,10 +36,6 @@ function o = set_params(o, params)
   for i = 1:numel(tmp)
     o.params.(tmp{i}) = params.(tmp{i});
   end
-end
-
-function o = set_y(o, y)
-  o.yhat = fft(y);
 end
 
 function o = reset(o)
@@ -77,6 +73,15 @@ function ainit = data_init(o, p0, calc_grad)
   ainit = ainit(:)/norm(ainit(:));
 end
 
+function del_yvars = mk_yvars(o)
+% Only create and delete yvars at the outermost loop.
+  del_yvars = ~o.yvars;    
+  if ~o.yvars   % only happens if yvars are invalid
+    o.yvars = true;
+    o.yhat = fft(o.y);
+  end
+end
+
 function o = step(o)
 end
 
@@ -84,6 +89,10 @@ function g = calc_grad(o, a) %#ok<INUSD,STOUT>
 end
 
 function [o, stats] = iterate(o)
+  del_yvars = o.mk_yvars();
+  assert(~isempty(o.y), 'y has not been initialized.');
+  assert(~isempty(o.a), 'a has not been initialized.');
+  
   ilim = o.params.iter_ilim;
   tol = o.params.iter_tol;
 
@@ -102,6 +111,7 @@ function [o, stats] = iterate(o)
   stats.it = i;
   stats.eps = eps;
   stats.costs = costs(2:i+1);
+  o.yvars = ~del_yvars;
 end
 
 function o = center(o)
@@ -116,6 +126,7 @@ function o = center(o)
 end
 
 function [o, stats] = solve(o)
+  del_yvars = o.mk_yvars();
   o_lam = o.params.lambda;
 
   if ~isempty(o.params.solve_lambdas)
@@ -135,6 +146,7 @@ function [o, stats] = solve(o)
   end
   o.params.lambda = o_lam;
   stats = cell2mat(stats);
+  o.yvars = ~del_yvars;
 end
 
 end
