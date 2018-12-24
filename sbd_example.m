@@ -18,12 +18,15 @@ y = cconv(a0, x0, m);
 %% Initialize solver + run some iterations of iPALM
 % Solver properties
 params = struct();
-params.solve_lambdas = 2e-1*[1/sqrt(p*theta) 1];
-params.alph = 0;
-params.iter_lim = [1 1e3];
-params.iter_tol = 1e-3;
+params.solve_lambdas = 2e-1*[1/sqrt(p*theta) 1];    % sequence of lambdas
+params.alph = 0;                  % momentum
+params.iter_lim = [1 1e3];        % min/max iterations per lambda
+params.iter_tol = 1e-3;           % stepsize*grad together must be small
 params.backtrack = [0.1 0.1];     % [btdec btslack]; set empty [] to turn off
-params.refine_iters = [];
+
+params.refine_iters = [];         % n_refine x 2 array; set empty [] to turn off
+% e.g. for 5 refinement steps; 10 fista and 20 agd iterations each
+%   refine_iters = ones(5,1)*[10 20];
 
 solver = sbd_lasso(params);
 solver = sbd_dq(params);
