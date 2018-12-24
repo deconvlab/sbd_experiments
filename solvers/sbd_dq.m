@@ -7,6 +7,7 @@ end
 
 methods
 function o = sbd_dq(y, params)
+  if nargin < 2;  params = [];  end
   o = o@sbd_template(y, params);
   o = set_y(o,y);
 end
@@ -58,7 +59,7 @@ function o = step(o)
     cost = o.half_ynorm_sq - norm(o.x)^2/2;
 
     repeat = (cost-cost_ >= -t*norm(g)) && (t > o.t);
-    if repeat;  t = bt * t;  end
+    if repeat;  t = bt * t;  end %else;  disp(t/o.t);  end
   end
 
   o.cost = cost;

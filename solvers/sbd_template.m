@@ -17,7 +17,7 @@ end
 methods
 function o = sbd_template(y, params)
   o = o.default_params();
-  if nargin >= 3 && ~isempty(params)
+  if nargin >= 2 && ~isempty(params)
     o = set_params(o, params);
   end
   o = reset(set_y(o, y));
