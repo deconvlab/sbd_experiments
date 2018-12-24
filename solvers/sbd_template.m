@@ -62,6 +62,7 @@ function o = set_ainit(o, ainit)
 end
 
 function ainit = data_init(o, p0, calc_grad)
+  assert(~isempty(o.y), 'y has not been initialized.');
   if nargin < 3;  calc_grad = false;  end
   m = numel(o.y);
 

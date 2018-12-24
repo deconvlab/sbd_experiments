@@ -5,7 +5,7 @@ function results = loop2var(solverfun, params, results)
 %
 % Arguments:
 %   SOLVERFUN: Function handle.  When called creates a SBD solver as follows:
-%     SOLVER = SOLVERFUN(Y, A_INIT, VAR1, VAR2).
+%     SOLVER = SOLVERFUN(VAR1, VAR2).
 %
 %   PARAMS: Struct.  With the following fields:
 %     vars: 2x2 cell array.  Each row contains the {VARNAME, VARARRAY}
@@ -115,19 +115,19 @@ function results = loop2var(solverfun, params, results)
     for trial = 1:trials
     %parfor (trial = 1:trials, n_workers)
       % A) Generate data: supp(x) must be >= 1
-      a0 = gen.a0(v1i, v2j);  %#ok<PFBNS>
+      a0 = gen.a0(v1i, v2j);  
       a0 = a0/norm(a0);
 
       xgood = false;
       while ~xgood
-        x0 = gen.x0(v1i, v2j); %#ok<PFBNS>
+        x0 = gen.x0(v1i, v2j); 
         xgood = sum(x0~=0) >= 1;
       end
       y = cconv(a0, x0, numel(x0));
 
       % B) Create solver and run continuation sequence
-      solver = solverfun(y, v1i, v2j); %#ok<PFBNS>
-
+      solver = solverfun(v1i, v2j); 
+      solver.y = y;
       ainit = gen.ainit(v1i, v2j, solver, a0, x0);
       ainit = ainit/norm(ainit);
       solver.set_ainit(ainit);

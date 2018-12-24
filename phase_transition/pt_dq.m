@@ -36,7 +36,7 @@ solparams = @(theta, p) struct( ...
 );
 
 % How the solver gets initialized as parameters change
-solverfun = @(y, log_t, log_p) sbd_dq(y, solparams(10^log_t, round(10^log_p)));
+solverfun = @(log_t, log_p) sbd_dq(solparams(10^log_t, round(10^log_p)));
 
 %% Run experiment
 warning('OFF', 'MATLAB:mir_warning_maybe_uninitialized_temporary');
