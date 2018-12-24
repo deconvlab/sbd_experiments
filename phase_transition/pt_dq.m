@@ -29,10 +29,12 @@ params.gen.ainit = @(~, log_p, solver, a0, x0) ...
 % e.g. for 5 refinement steps; 10 fista and 20 agd iterations each
 %   refine_iters = ones(5,1)*[10 20];
 solparams = @(theta, p) struct( ...
-  'iter_lim', [1 1e3], ...      % min / max iterations
-  'iter_tol', 1e-3, ...         % tolerence until exiting iterations
-  'solve_lambdas', 0.2*[1/sqrt(p*theta) 1], ...   % sequence of lambdas
-  'refine_iters', [] ...        % xsolve and agd iterations
+  'iter_lim',       [1 1e3], ...      % min / max iterations
+  'iter_tol',       1e-3, ...         % tolerence until exiting iterations
+  'solve_lambdas',  0.2*[1/sqrt(p*theta) 1], ...   % sequence of lambdas
+  'alph',           0.1, ...          % momentum
+  'backtrack',      [0.1 0.1], ...    % [btdec btslack]; set empty [] to turn off
+  'refine_iters',   [] ...            % refine using xsolve and agd iterations
 );
 
 % How the solver gets initialized as parameters change

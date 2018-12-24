@@ -22,7 +22,7 @@ params.solve_lambdas = 2e-1*[1/sqrt(p*theta) 1];
 params.alph = 0;
 params.iter_lim = [1 1e3];
 params.iter_tol = 1e-3;
-params.backtrack = [0.1 0.1];
+params.backtrack = [0.1 0.1];     % [btdec btslack]; set empty [] to turn off
 params.refine_iters = [];
 
 solver = sbd_lasso(params);
