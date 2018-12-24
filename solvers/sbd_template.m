@@ -4,6 +4,7 @@ properties
   params;
 
   cost;
+  gnorm2;  t;
   it;
 end
 
@@ -76,7 +77,8 @@ function [o, stats] = iterate(o)
     i = i + 1;
     costs(i+1) = o.cost;
 
-    eps = abs(costs(i+1) - costs(i));
+    %eps = abs(costs(i+1) - costs(i));
+    eps = o.gnorm2 * o.t;
     repeat = (i < ilim(1)) || ((i < ilim(2)) && (eps > tol));
   end
   stats.a = o.a;

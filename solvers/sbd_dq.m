@@ -2,7 +2,7 @@ classdef sbd_dq < sbd_template
 
 properties (Access = protected)
   half_ynorm_sq;
-  t
+  tmin;
 end
 
 methods
@@ -16,7 +16,7 @@ function o = default_params(o)
     'lambda', 0.1,  'alph', 0.9, ...
     'iter_ilim', [1 1e3],  'iter_tol', 1e-3, ...
     'solve_lambdas', [],  'solve_center', false, ...
-    'backtrack', NaN, ...
+    'backtrack', [0.1 0.1], ...
     'refine_iters', 10*ones(10,2) ...
   );
 end
@@ -27,7 +27,7 @@ function del_tmpvars = mk_tmpvars(o)
   if ~o.tmpvars   % only happens if tmpvars are invalid
     mk_tmpvars@sbd_template(o);
     o.half_ynorm_sq = norm(o.y)^2/2;
-    o.t = 0.99/max(abs(o.yhat))^2;
+    o.tmin = 0.99/max(abs(o.yhat))^2;
   end
 end
 
@@ -53,23 +53,28 @@ function o = step(o)
       w = o.a;
   end
   [g, x] = o.calc_grad(w);
+  g = o.s.e2rgrad(w, g);
+  o.gnorm2 = norm(g)^2;
   cost_ = o.half_ynorm_sq - norm(x)^2/2;
 
-  o.a_ = o.a;
-  bt = o.params.backtrack;
-  if (0 < bt) && (bt < 1);  t = 1;  else;  t = o.t;  end
+  if ~isempty(o.params.backtrack)
+    o.t = 1;  btdec = o.params.backtrack(1);  btslack = o.params.backtrack(2);
+  else
+    o.t = o.tmin;  btslack = 1;
+  end
 
   repeat = true;
   while repeat
-    t = max(t, o.t); %#ok<*PROP>
-    o.a = o.s.Exp(w, -t * o.s.e2rgrad(w, g));
-    [~, o.x] = o.calc_grad(w);
-    cost = o.half_ynorm_sq - norm(o.x)^2/2;
+    o.t = max(o.t, o.tmin); %#ok<*PROP>
+    a = o.s.Exp(w, -o.t * g);
+    [~, x] = o.calc_grad(a);
+    cost = o.half_ynorm_sq - norm(x)^2/2;
 
-    repeat = (cost-cost_ >= -t*norm(g)) && (t > o.t);
-    if repeat;  t = bt * t;  end %else;  disp(t/o.t);  end
+    repeat = (cost-cost_ >= -btslack*o.t*o.gnorm2) && (o.t > o.tmin);
+    if repeat;  o.t = btdec * o.t;  end  %else;  disp(o.t/o.tmin);  end
   end
 
+  o.a_ = o.a;  o.a = a;  o.x = x;
   o.cost = cost;
   o.it = o.it + 1;
   o.tmpvars = ~del_tmpvars;

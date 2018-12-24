@@ -4,39 +4,36 @@ run('initpkg.m');
 
 %% Generate some synthetic data.
 % Params
-p = 1000;                     % Size of the (short) kernel
-m = 1e2*p;                    % Observation size
-theta = 10^-3;                % Bernoulli (sparsity) coefficient
-dist = @(m,n) randn(m,n);     % Distribution of activations
+p = 5e2;                      % Size of the (short) kernel
+m = 1e3*p;                    % Observation size
+theta = 2/p;                  % Bernoulli (sparsity) coefficient
+dist = @(m) randn(m,1);       % Distribution of activations
 
 a0 = randn(p,1);
 %a0 = normpdf(1:p, (p+1)/2, p/10)';
 a0 = a0/norm(a0);
-x0 = (rand(m,1) <= theta) .* dist(m,1);
+x0 = (rand(m,1) <= theta) .* dist(m);
 y = cconv(a0, x0, m);
 
 %% Initialize solver + run some iterations of iPALM
 % Solver properties
-params = struct(...
-  'solve_lambdas', 0.2*[1/sqrt(p*theta)], ...
-  'alph', 0.9, ...
-  'iter_ilim', [1 1e2], ...
-  'iter_tol', 1e-3, ...
-  'backtrack', NaN, ...
-  'refine_iters', [] ...
-);
-
-params = struct('alph', 0, 'refine_iters', []);
+params = struct();
+params.solve_lambdas = 2e-1*[1/sqrt(p*theta) 1];
+params.alph = 0;
+params.iter_lim = [1 1e3];
+params.iter_tol = 1e-3;
+params.backtrack = [0.1 0.1];
+params.refine_iters = [];
 
 solver = sbd_lasso(params);
-%solver = sbd_dq(params);
+solver = sbd_dq(params);
 solver.y = y;
 solver.a = data_ainit(solver, p,1);
 
 %profile on;
 [solver, stats] = solver.solve();
 %profile off; profile viewer
-stats %#ok<NOPTS>
+clc; stats(1).it
 
 % Plot results
 subplot(141); plot([y cconv(solver.a, solver.x, m)]); xlim([1 m]);

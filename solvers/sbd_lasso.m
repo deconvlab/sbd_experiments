@@ -22,10 +22,12 @@ function o = step(o)
 
   w = o.s.Exp(o.a, o.params.alph * o.s.Log(o.a_, o.a));
   [g, o.cost, xhat] = o.calc_grad(w);
+  g = o.s.e2rgrad(w, g);
+  o.gnorm2 = norm(g)^2;
 
-  t = 0.99/max(abs(xhat))^2;
+  o.t = 0.99/max(abs(xhat))^2;
   o.a_ = o.a;
-  o.a = o.s.Exp(w, -t*o.s.e2rgrad(w, g));
+  o.a = o.s.Exp(w, -o.t*g);
   o.it = o.it + 1;
   o.tmpvars = ~del_tmpvars;
 end
