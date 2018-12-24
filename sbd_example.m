@@ -26,7 +26,7 @@ params = struct(...
   'refine_iters', [] ...
 );
 
-params = struct('refine_iters', []);
+params = struct('alph', 0, 'refine_iters', []);
 
 solver = sbd_dq(y, params);
 solver.set_ainit(solver.data_init(p,1));
