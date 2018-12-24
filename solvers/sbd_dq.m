@@ -21,19 +21,18 @@ function o = default_params(o)
   );
 end
 
-function del_yvars = mk_yvars(o)
-% Only create and delete yvars at the outermost loop.
-  del_yvars = ~o.yvars;    
-  if ~o.yvars   % only happens if yvars are invalid
-    o.yvars = true;
-    o.yhat = fft(o.y);
+function del_tmpvars = mk_tmpvars(o)
+% Only create and delete tmpvars at the outermost loop.
+  del_tmpvars = ~o.tmpvars;    
+  if ~o.tmpvars   % only happens if tmpvars are invalid
+    mk_tmpvars@sbd_template(o);
     o.half_ynorm_sq = norm(o.y)^2/2;
     o.t = 0.99/max(abs(o.yhat))^2;
   end
 end
 
 function [g, x] = calc_grad(o, a)
-  del_yvars = o.mk_yvars();  
+  del_tmpvars = o.mk_tmpvars();  
   
   x = real(ifft(o.yhat .* conj(fft(a, numel(o.y)))));
   x = soft(x, o.params.lambda);
@@ -42,11 +41,11 @@ function [g, x] = calc_grad(o, a)
   g = -real(ifft(conj(xhat) .* o.yhat));
   g = g(1:numel(a));
   
-  o.yvars = ~del_yvars;
+  o.tmpvars = ~del_tmpvars;
 end
 
 function o = step(o)
-  del_yvars = o.mk_yvars();  
+  del_tmpvars = o.mk_tmpvars();  
   
   if o.params.alph > 0
       w = o.s.Exp(o.a, o.params.alph * o.s.Log(o.a_, o.a));
@@ -73,11 +72,11 @@ function o = step(o)
 
   o.cost = cost;
   o.it = o.it + 1;
-  o.yvars = ~del_yvars;
+  o.tmpvars = ~del_tmpvars;
 end
 
 function [o, stats] = solve(o)
-  del_yvars = o.mk_yvars();  
+  del_tmpvars = o.mk_tmpvars();  
   
   % Iterate for all lambdas
   [o, stats] = solve@sbd_template(o);
@@ -115,7 +114,7 @@ function [o, stats] = solve(o)
       lambda = lambda/2;
     end
   end
-  o.yvars = ~del_yvars;
+  o.tmpvars = ~del_tmpvars;
 end
 
 end

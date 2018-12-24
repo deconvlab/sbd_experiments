@@ -9,7 +9,7 @@ end
 
 properties (Access = protected)
   p0;
-  yvars = false;  
+  tmpvars = false;
   yhat;
   ainit;  a_;
   s = obops;
@@ -39,47 +39,18 @@ function o = set_params(o, params)
 end
 
 function o = reset(o)
-  o.a = o.ainit;  o.a_ = o.ainit;
   o.x = [];
   o.it = 0;
   o.cost = [];
 end
 
-function o = set_ainit(o, ainit)
-  if nargin < 2 || isempty(ainit)
-    ainit = o.p0;
-  end
-
-  if numel(ainit) > 1
-    o.ainit = ainit;
-    o.p0 = numel(ainit);
-    o.ainit = o.ainit(:)/norm(o.ainit(:));
-  else
-    o.ainit = data_init(o, ainit);
-  end
-
-  o.a = o.ainit;  o.a_ = o.ainit;
-end
-
-function ainit = data_init(o, p0, calc_grad)
-  assert(~isempty(o.y), 'y has not been initialized.');
-  if nargin < 3;  calc_grad = false;  end
-  m = numel(o.y);
-
-  ainit = o.y(mod(randi(m) + (1:p0), m) + 1);
-  ainit = [zeros(p0-1,1); ainit(:); zeros(p0-1,1)];
-  if calc_grad
-    ainit = -o.calc_grad(ainit/norm(ainit(:)));
-  end
-  ainit = ainit(:)/norm(ainit(:));
-end
-
-function del_yvars = mk_yvars(o)
-% Only create and delete yvars at the outermost loop.
-  del_yvars = ~o.yvars;    
-  if ~o.yvars   % only happens if yvars are invalid
-    o.yvars = true;
+function del_tmpvars = mk_tmpvars(o)
+% Only create and delete temp. vars at the outermost loop.
+  del_tmpvars = ~o.tmpvars;
+  if ~o.tmpvars   % only happens if tmpvars are invalid
+    o.tmpvars = true;
     o.yhat = fft(o.y);
+    o.a_ = o.a;
   end
 end
 
@@ -90,10 +61,10 @@ function g = calc_grad(o, a) %#ok<INUSD,STOUT>
 end
 
 function [o, stats] = iterate(o)
-  del_yvars = o.mk_yvars();
+  del_tmpvars = o.mk_tmpvars();
   assert(~isempty(o.y), 'y has not been initialized.');
   assert(~isempty(o.a), 'a has not been initialized.');
-  
+
   ilim = o.params.iter_ilim;
   tol = o.params.iter_tol;
 
@@ -112,7 +83,7 @@ function [o, stats] = iterate(o)
   stats.it = i;
   stats.eps = eps;
   stats.costs = costs(2:i+1);
-  o.yvars = ~del_yvars;
+  o.tmpvars = ~del_tmpvars;
 end
 
 function o = center(o)
@@ -127,7 +98,7 @@ function o = center(o)
 end
 
 function [o, stats] = solve(o)
-  del_yvars = o.mk_yvars();
+  del_tmpvars = o.mk_tmpvars();
   o_lam = o.params.lambda;
 
   if ~isempty(o.params.solve_lambdas)
@@ -147,7 +118,7 @@ function [o, stats] = solve(o)
   end
   o.params.lambda = o_lam;
   stats = cell2mat(stats);
-  o.yvars = ~del_yvars;
+  o.tmpvars = ~del_tmpvars;
 end
 
 end

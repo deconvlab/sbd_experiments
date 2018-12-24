@@ -130,7 +130,7 @@ function results = loop2var(solverfun, params, results)
       solver.y = y;
       ainit = gen.ainit(v1i, v2j, solver, a0, x0);
       ainit = ainit/norm(ainit);
-      solver.set_ainit(ainit);
+      solver.a = ainit;
 
       [solver, stats] = solver.solve();
 

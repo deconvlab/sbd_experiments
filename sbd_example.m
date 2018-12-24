@@ -29,9 +29,9 @@ params = struct(...
 params = struct('alph', 0, 'refine_iters', []);
 
 solver = sbd_lasso(params);
-solver = sbd_dq(params);
+%solver = sbd_dq(params);
 solver.y = y;
-solver.set_ainit(solver.data_init(p,1));
+solver.a = data_ainit(solver, p,1);
 
 %profile on;
 [solver, stats] = solver.solve();
