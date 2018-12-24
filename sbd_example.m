@@ -26,7 +26,8 @@ params = struct(...
   'iter_tol', 1e-3);
 
 %% Initialize solver + run some iterations of iPALM
-solver = sbd_dq(y, p, params);
+solver = sbd_dq(y, params);
+solver.set_ainit(p);
 
 %profile on;
 [solver, stats] = solver.solve();
