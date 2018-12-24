@@ -13,7 +13,7 @@ end
 
 function o = default_params(o)
   o.params = struct( ...
-    'lambda', 0.1,  'alph', 0.9, ...
+    'lambda', 0.1,  'alph', 0.1, ...
     'iter_ilim', [1 1e3],  'iter_tol', 1e-3, ...
     'solve_lambdas', [],  'solve_center', false, ...
     'backtrack', [0.1 0.1], ...
@@ -23,7 +23,7 @@ end
 
 function del_tmpvars = mk_tmpvars(o)
 % Only create and delete tmpvars at the outermost loop.
-  del_tmpvars = ~o.tmpvars;    
+  del_tmpvars = ~o.tmpvars;
   if ~o.tmpvars   % only happens if tmpvars are invalid
     mk_tmpvars@sbd_template(o);
     o.half_ynorm_sq = norm(o.y)^2/2;
@@ -32,21 +32,21 @@ function del_tmpvars = mk_tmpvars(o)
 end
 
 function [g, x] = calc_grad(o, a)
-  del_tmpvars = o.mk_tmpvars();  
-  
+  del_tmpvars = o.mk_tmpvars();
+
   x = real(ifft(o.yhat .* conj(fft(a, numel(o.y)))));
   x = soft(x, o.params.lambda);
   xhat = fft(x);
 
   g = -real(ifft(conj(xhat) .* o.yhat));
   g = g(1:numel(a));
-  
+
   o.tmpvars = ~del_tmpvars;
 end
 
 function o = step(o)
-  del_tmpvars = o.mk_tmpvars();  
-  
+  del_tmpvars = o.mk_tmpvars();
+
   if o.params.alph > 0
       w = o.s.Exp(o.a, o.params.alph * o.s.Log(o.a_, o.a));
   else
@@ -81,8 +81,8 @@ function o = step(o)
 end
 
 function [o, stats] = solve(o)
-  del_tmpvars = o.mk_tmpvars();  
-  
+  del_tmpvars = o.mk_tmpvars();
+
   % Iterate for all lambdas
   [o, stats] = solve@sbd_template(o);
 
