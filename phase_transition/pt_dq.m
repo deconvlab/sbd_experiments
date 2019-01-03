@@ -3,12 +3,12 @@ clear; %clc; %#ok<*PFBNS>
 run('../initpkg.m');
 
 %% Settings
-ngrid = 3;              % Number of elements per grid
-params.trials = 2;      % Number of trials per choice of parameters
+ngrid = 11;              % Number of elements per grid
+params.trials = 5;      % Number of trials per choice of parameters
 
 params.vars = { ...
   %'log_t'   linspace(-3.5, -3, ngrid); ...   % log theta
-  'log_t'   linspace(-4, -3, ngrid); ...
+  'log_t'   linspace(-3, -2, ngrid); ...
 
   %'log_p'   linspace(3.5, 4.5, ngrid); ...   % log p
   'log_p'   linspace(3, 4, ngrid); ...
@@ -19,7 +19,7 @@ params.backup = 'results_backup';   % variable to update as the trials go
 params.n_workers = Inf;
 
 % How to pick x0, a0, and a_init
-m = @(log_p) 100*round(10^log_p);
+m = @(log_p) 5e5;
 params.gen.x0 = @(log_t, log_p) (rand(m(log_p),1) <= 10^log_t) .* randn(m(log_p),1);
 params.gen.a0 = @(~, log_p) randn(round(10^log_p), 1);
 params.gen.ainit = @(~, log_p, solver, a0, x0) ...
@@ -31,7 +31,7 @@ params.gen.ainit = @(~, log_p, solver, a0, x0) ...
 solparams = @(theta, p) struct( ...
   'iter_lim',       [1 1e3], ...      % min / max iterations
   'iter_tol',       1e-3, ...         % tolerence until exiting iterations
-  'solve_lambdas',  0.2*[1/sqrt(p*theta) 1], ...   % sequence of lambdas
+  'solve_lambdas',  0.5*[1/sqrt(p*theta) 1], ...   % sequence of lambdas
   'alph',           0.1, ...          % momentum
   'backtrack',      [0.1 0.1], ...    % [btdec btslack]; set empty [] to turn off
   'refine_iters',   [] ...            % refine using xsolve and agd iterations
